@@ -1,0 +1,19 @@
+{
+  "name": "qwen2.5-coder:7b",
+  "digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+  "tier": "7-14B",
+  "runtime": "ollama",
+  "ollama_version": "0.40.14",
+  "parameter_size": "7.6B",
+  "quantization": "Q4_K_M",
+  "options": {
+    "num_ctx": 16384,
+    "temperature": 0.2
+  },
+  "seed_policy": "pass the run's seed as options.seed on every call",
+  "used_by": [
+    "orchestrator",
+    "swebench_subagent",
+    "sweqa_subagent"
+  ]
+}
