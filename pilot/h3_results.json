@@ -1,0 +1,607 @@
+{
+  "hypothesis": "H3: first-pass validity rises from C to D",
+  "date": "2026-11-24",
+  "model": "qwen2.5-coder:7b",
+  "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+  "options": {
+    "num_ctx": 16384,
+    "temperature": 0.2
+  },
+  "fixture_seeds": [
+    1,
+    2,
+    3
+  ],
+  "corpus_seed": 1,
+  "summary": {
+    "fixture": {
+      "A": {
+        "n": 3,
+        "first_pass_valid_rate": 1.0,
+        "valid_rate": 1.0,
+        "mean_rounds": 0.0,
+        "mean_design_tokens": 0.0
+      },
+      "B": {
+        "n": 3,
+        "first_pass_valid_rate": null,
+        "valid_rate": null,
+        "mean_rounds": 0.0,
+        "mean_design_tokens": 404.0
+      },
+      "C": {
+        "n": 3,
+        "first_pass_valid_rate": 0.0,
+        "valid_rate": 0.0,
+        "mean_rounds": 0.0,
+        "mean_design_tokens": 400.7
+      },
+      "D": {
+        "n": 3,
+        "first_pass_valid_rate": 0.3333,
+        "valid_rate": 1.0,
+        "mean_rounds": 0.667,
+        "mean_design_tokens": 2971.7
+      }
+    },
+    "corpus": {
+      "n": 15,
+      "first_pass_valid": 4,
+      "valid_after_model_repair": 14,
+      "valid_after_compiler_only": 11,
+      "still_invalid": 1,
+      "rounds_to_valid": {
+        "0": 4,
+        "1": 10
+      },
+      "design_tokens": 9177
+    },
+    "h3": {
+      "c_first_pass_valid_rate": 0.0,
+      "d_first_pass_valid_rate": 0.3333,
+      "d_valid_after_repair_rate": 1.0,
+      "first_pass_rises_c_to_d": true,
+      "note": "C has no acceptance test, budgets, stop rule, verification, or return contract by construction, so its first-pass validity is 0 unless the validator changes."
+    },
+    "orchestrator_failures": [
+      {
+        "source": "corpus",
+        "spec_id": "empty_goal",
+        "designer": "D",
+        "seed": 1,
+        "remaining_errors": [
+          "command.unknown"
+        ],
+        "missing_acceptance_test": false
+      }
+    ]
+  },
+  "rows": [
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "A",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.0
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "B",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": null,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 1,
+      "valid": null,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 490,
+      "wall_clock_s": 11.776
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "C",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "model.tier",
+        "schema.missing",
+        "tool.path"
+      ],
+      "rounds": 0,
+      "model_calls": 1,
+      "valid": false,
+      "remaining_errors": [
+        "model.tier",
+        "schema.missing",
+        "tool.path"
+      ],
+      "missing_acceptance_test": true,
+      "design_tokens": 398,
+      "wall_clock_s": 3.689
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "command.unknown"
+      ],
+      "rounds": 1,
+      "model_calls": 2,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 3675,
+      "wall_clock_s": 40.752
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "A",
+      "seed": 2,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.0
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "B",
+      "seed": 2,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": null,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 1,
+      "valid": null,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 363,
+      "wall_clock_s": 4.537
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "C",
+      "seed": 2,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "model.tier",
+        "schema.missing",
+        "tool.path"
+      ],
+      "rounds": 0,
+      "model_calls": 1,
+      "valid": false,
+      "remaining_errors": [
+        "model.tier",
+        "schema.missing",
+        "tool.path"
+      ],
+      "missing_acceptance_test": true,
+      "design_tokens": 406,
+      "wall_clock_s": 4.028
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "D",
+      "seed": 2,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "command.unknown",
+        "schema.format"
+      ],
+      "rounds": 1,
+      "model_calls": 2,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 3675,
+      "wall_clock_s": 41.503
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "A",
+      "seed": 3,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.0
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "B",
+      "seed": 3,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": null,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 1,
+      "valid": null,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 359,
+      "wall_clock_s": 4.52
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "C",
+      "seed": 3,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "model.tier",
+        "schema.missing"
+      ],
+      "rounds": 0,
+      "model_calls": 1,
+      "valid": false,
+      "remaining_errors": [
+        "model.tier",
+        "schema.missing"
+      ],
+      "missing_acceptance_test": true,
+      "design_tokens": 398,
+      "wall_clock_s": 3.85
+    },
+    {
+      "source": "fixture",
+      "spec_id": "off_by_one",
+      "designer": "D",
+      "seed": 3,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 1,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 1565,
+      "wall_clock_s": 19.537
+    },
+    {
+      "source": "corpus",
+      "spec_id": "valid_basic",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.0,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "valid_exec_test_tool",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.0,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "valid_tight_budget",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.0,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "valid_escalate",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": true,
+      "first_pass_errors": [],
+      "rounds": 0,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.0,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "unknown_tool",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "tool.unknown"
+      ],
+      "rounds": 1,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.001,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "privilege_exec_on_write_tool",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "tool.privilege"
+      ],
+      "rounds": 1,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.001,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "steps_above_parent",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "budget.above_parent"
+      ],
+      "rounds": 1,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.001,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "tokens_below_steps",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "budget.infeasible"
+      ],
+      "rounds": 1,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.001,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "no_acceptance_tests",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "goal.acceptance_tests"
+      ],
+      "rounds": 1,
+      "model_calls": 1,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 1820,
+      "wall_clock_s": 25.851,
+      "compiler_only_valid": false
+    },
+    {
+      "source": "corpus",
+      "spec_id": "bad_tier",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "model.tier"
+      ],
+      "rounds": 1,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.001,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "context_escape",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "context.path"
+      ],
+      "rounds": 1,
+      "model_calls": 1,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 1815,
+      "wall_clock_s": 19.645,
+      "compiler_only_valid": false
+    },
+    {
+      "source": "corpus",
+      "spec_id": "extra_field",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "schema.extra"
+      ],
+      "rounds": 1,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.001,
+      "compiler_only_valid": true
+    },
+    {
+      "source": "corpus",
+      "spec_id": "aorchestra_tuple",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "model.tier",
+        "schema.missing"
+      ],
+      "rounds": 1,
+      "model_calls": 1,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 1739,
+      "wall_clock_s": 24.241,
+      "compiler_only_valid": false
+    },
+    {
+      "source": "corpus",
+      "spec_id": "empty_goal",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "goal.empty"
+      ],
+      "rounds": 2,
+      "model_calls": 2,
+      "valid": false,
+      "remaining_errors": [
+        "command.unknown"
+      ],
+      "missing_acceptance_test": false,
+      "design_tokens": 3803,
+      "wall_clock_s": 46.938,
+      "compiler_only_valid": false
+    },
+    {
+      "source": "corpus",
+      "spec_id": "write_path_outside_grant",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "first_pass_valid": false,
+      "first_pass_errors": [
+        "tool.path"
+      ],
+      "rounds": 1,
+      "model_calls": 0,
+      "valid": true,
+      "remaining_errors": [],
+      "missing_acceptance_test": false,
+      "design_tokens": 0,
+      "wall_clock_s": 0.001,
+      "compiler_only_valid": true
+    }
+  ]
+}
