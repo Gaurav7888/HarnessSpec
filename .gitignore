@@ -3,6 +3,8 @@ __pycache__/
 .venv/
 .pytest_cache/
 pilot/tmp/
+pilot/*.lock
+pilot/traces/**/.run.lock
 .DS_Store
 docs/*.log
 docs/*.aux

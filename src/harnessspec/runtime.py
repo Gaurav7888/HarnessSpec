@@ -7,6 +7,7 @@ for a later live run.
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Callable
 
 from harnessspec.hooks import HookOutcome, run_hook
 from harnessspec.parent import PERMISSION_RANK, CapabilityCard
@@ -25,6 +26,7 @@ class Action:
     path: str | None = None
     write_content: str | None = None
     result: AgentResult | None = None
+    line_range: tuple[int, int] | None = None
 
 
 @dataclass
@@ -145,6 +147,8 @@ class Session:
         parent: CapabilityCard,
         workspace: Path,
         clock: FakeClock | SystemClock | None = None,
+        *,
+        hook_runner: Callable[[dict, Path, list[str], float], HookOutcome] | None = None,
     ) -> None:
         problems = validate(spec, parent)
         if problems:
@@ -157,6 +161,7 @@ class Session:
         self.trace = Trace()
         self.budgets = spec["budgets"]
         self.allow = {tool["name"]: tool for tool in spec["tools"]}
+        self.hook_runner = hook_runner or run_hook
 
     def step(self, action: Action) -> Observation:
         if self.trace.stopped is not None:
@@ -189,7 +194,8 @@ class Session:
             return self._observation(True, None, detail, _tool_output(action, self.workspace))
 
         if action.kind == "return":
-            _finish_return(self.spec, action, self.workspace, self.trace, self.budgets, self.clock, self.start)
+            _finish_return(self.spec, action, self.workspace, self.trace, self.budgets,
+                           self.clock, self.start, self.hook_runner)
             last = self.trace.events[-1]
             return self._observation(
                 bool(self.trace.return_accepted),
@@ -265,6 +271,12 @@ def _apply_tool(action: Action, allow: dict, workspace: Path) -> tuple[str, str]
     target = resolve_inside(workspace, relative)
     if target is None:
         return ("tool.path", f"{relative} escapes the workspace")
+    if action.line_range is not None:
+        first, last = action.line_range
+        if (action.tool != "read_file" or permission != "read" or not target.is_file()
+                or type(first) is not int or type(last) is not int
+                or not 1 <= first <= last or last - first >= 200):
+            return ("tool.line_range", "line ranges require a file read of at most 200 lines")
     if permission == "write":
         if action.write_content is None:
             return ("tool.path", "write action has no content")
@@ -292,6 +304,11 @@ def _tool_output(action: Action, workspace: Path) -> str:
                 break
         return "\n".join(names)
     text = target.read_text(encoding="utf-8", errors="replace")
+    if action.line_range is not None:
+        first, last = action.line_range
+        lines = text.splitlines()
+        numbered = [f"{index}: {line}" for index, line in enumerate(lines[first - 1:last], first)]
+        text = "\n".join([f"File has {len(lines)} lines.", *numbered])
     if len(text) > 12000:
         return text[:12000] + "\n... truncated"
     return text
@@ -305,12 +322,13 @@ def _return_output(trace: Trace) -> str:
     return "\n".join(chunks)
 
 
-def _finish_return(spec, action: Action, workspace: Path, trace: Trace, budgets, clock, start) -> None:
+def _finish_return(spec, action: Action, workspace: Path, trace: Trace, budgets, clock, start,
+                   hook_runner) -> None:
     include = list(spec.get("context", {}).get("include", []))
     remaining = budgets["max_seconds"] - (clock.now() - start)
     failed = False
     for hook in spec.get("verification", {}).get("hooks", []):
-        outcome = run_hook(hook, workspace, include, remaining)
+        outcome = hook_runner(hook, workspace, include, remaining)
         trace.hooks.append(outcome)
         trace.events.append(
             TraceEvent(
