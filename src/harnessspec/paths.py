@@ -10,7 +10,7 @@ from pathlib import Path, PurePosixPath
 def is_relative_safe(value: str) -> bool:
     if not isinstance(value, str) or value == "" or value.startswith("/"):
         return False
-    if "\\" in value:
+    if "\\" in value or "\x00" in value:
         return False
     if value == ".":
         return True

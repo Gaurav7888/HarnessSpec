@@ -3,9 +3,24 @@ __pycache__/
 .venv/
 .pytest_cache/
 pilot/tmp/
+pilot/*.lock
+pilot/traces/**/.run.lock
 .DS_Store
 docs/*.log
 docs/*.aux
 docs/*.out
 docs/*.xdv
 docs/mid_submission.pdf
+pilot/experiments/**/*.lock
+pilot/analysis/**/*.lock
+
+# Keep reviewer materials and newly generated per-run data local during grading.
+pilot/traces/
+pilot/experiments/
+pilot/analysis/
+pilot/sweqa_results.json
+pilot/review/**/packet.json
+pilot/review/**/grade_template.json
+pilot/review/**/actions.tsv
+pilot/snapshots/**/grading_packet.json
+pilot/snapshots/**/execution.log

@@ -1,8 +1,10 @@
 # HarnessSpec
 
+**Public review edition.** Candidate materials, run-level records and the frozen tag are held privately while independent grading is pending. For the artifact inventory and public reproduction commands, see the [release notes](docs/PUBLICATION.md).
+
 Typed protocol for an orchestrator to design a subagent harness, and a compiler that checks the design before the subagent runs.
 
-This repository is the mid-submission snapshot for CS6.403 AutoSE, Monsoon 2026. The registered proposal is `docs/proposal.pdf` (21 October 2026). The four-page progress report is `docs/mid_submission_progress_report.pdf`. Its source is `docs/mid_submission.tex`.
+This repository includes the mid-submission snapshot for CS6.403 AutoSE, Monsoon 2026. The registered proposal is `docs/proposal.pdf` (21 October 2026). The four-page progress report is `docs/mid_submission_progress_report.pdf`. Its source is `docs/mid_submission.tex`.
 
 Registered proposal author: Syed Affan Daimi, M.S. CS, IIIT Hyderabad.
 
@@ -14,12 +16,14 @@ Registered proposal author: Syed Affan Daimi, M.S. CS, IIIT Hyderabad.
 - The subagent loop in `src/harnessspec/subagent.py`. `pilot/run_subagent.py` runs designers A (`fixed_generic_harness`) and D (`harness_d`) on `fixtures/off_by_one` by calling `grok-4.7-low` through the Cursor CLI (`agent -p --mode ask`). Those two specs are stand-ins, so `design_tokens` is 0. The CLI preamble tokens are recorded as `server_input_tokens` and are not what the step budget charges.
 - A trace revision that may spend unused parent budget and will not drop a citation requirement.
 - A fixture pilot on one buggy Python function and 15 hand-written specs. Numbers are in `pilot/results.json`.
-- One pinned model for the orchestrator, `qwen2.5-coder:7b`, in `pilot/model.json`. `src/harnessspec/llm.py` is that client. It checks the local digest against the pin and passes `num_ctx`, `temperature`, and the run's seed on every call. The fixture subagent uses `src/harnessspec/cursor_cli.py` instead, because this machine has no Ollama.
+- One pinned model for the orchestrator, `qwen2.5-coder:7b`, in `pilot/model.json`. `src/harnessspec/llm.py` is that client. It checks the local digest against the pin and passes `num_ctx`, `temperature`, and the run's seed on every call. The fixture subagent uses `src/harnessspec/cursor_cli.py` for the historical fixture run.
 - The orchestrator: `design(task, card, designer, seed)` in `src/harnessspec/orchestrator.py`, for designers A–D. The H3 pilot is in `pilot/h3_results.json`, and every model reply is in `pilot/h3_transcripts.json`.
+
+The SWE-QA pilot completed 20 real seed-1 attempts. Ten accepted A answers await independent grading. D had no accepted return. [Audit, grading materials and integration notes](docs/SWEQA_AUDIT.md)
 
 ## What is not done
 
-The ten SWE-bench Verified instances are listed in `pilot/swebench_instances.json`. They have not been run. There is no SWE-QA run, no energy measurement, and no test of H1, H2, or H4. Condition C in `pilot/results.json` is a structural check of a four-field tuple. The model-emitted C is in `pilot/h3_results.json`.
+The ten SWE-bench Verified instances are listed in `pilot/swebench_instances.json`. They have not been run. See [SWE-QA pilot and analysis](docs/SWEQA.md) for the pinned question manifest, read-only runner, external grading, shared benchmark records, and energy sidecars. Condition C in `pilot/results.json` is a structural check of a four-field tuple. The model-emitted C is in `pilot/h3_results.json`.
 
 ## Orchestrator interface
 

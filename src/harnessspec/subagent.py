@@ -51,7 +51,7 @@ def _citations(raw) -> list[Citation]:
             continue
         try:
             line = int(item.get("line"))
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             continue
         citations.append(Citation(str(item.get("file") or ""), line))
     return citations
@@ -77,6 +77,9 @@ def action_from_reply(content: str, tokens: int, seconds: float) -> Action:
             ),
         )
     content_value = data.get("content")
+    line_range = None
+    if "start_line" in data or "end_line" in data:
+        line_range = (data.get("start_line"), data.get("end_line"))
     return Action(
         kind="tool",
         tokens=tokens,
@@ -85,6 +88,7 @@ def action_from_reply(content: str, tokens: int, seconds: float) -> Action:
         permission=str(data.get("permission") or ""),
         path=str(data.get("path") or ""),
         write_content=None if content_value is None else str(content_value),
+        line_range=line_range,
     )
 
 
@@ -141,7 +145,7 @@ def run_subagent(
     ]
     log = []
     started = time.monotonic()
-    while session.trace.stopped is None:
+    while session.ready_for_call():
         reply: Reply = client.chat(messages, seed=seed, json_mode=True)
         seconds = 0.0 if wall_clock else reply.seconds
         charged = reply.tokens

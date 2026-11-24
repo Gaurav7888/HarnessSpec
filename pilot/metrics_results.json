@@ -1,0 +1,178 @@
+{
+  "benchmarks": {
+    "sweqa": {
+      "comparisons": {},
+      "designers": {
+        "D": {
+          "accepted_return_coverage": 10,
+          "accepted_returns": 0,
+          "accuracy": 0.0,
+          "attempted": 10,
+          "budget_violations": 4,
+          "design_tokens": 31839,
+          "first_pass_validity": 0.4,
+          "hook_failures": 0,
+          "mean_rounds": 0.8,
+          "mean_tokens": 6294.6,
+          "mean_wall_clock_s": 145.5066,
+          "resolved": 0,
+          "silent_given_accepted": null,
+          "silent_handoff_rate": 0.0,
+          "silent_handoffs": 0,
+          "subagent_tokens": 31107,
+          "tokens_per_correct": null,
+          "tool_denials": 48,
+          "total_tokens": 62946
+        }
+      },
+      "energy": [],
+      "h2_pending": [
+        "B",
+        "C"
+      ],
+      "h4": {
+        "baseline": "A",
+        "reuse_observed": false,
+        "scenarios": [],
+        "status": "no_eligible_reuse_groups"
+      },
+      "three_seed_requirement_met": false
+    }
+  },
+  "sweqa_execution_only": {
+    "designers": {
+      "A": {
+        "accepted_return_coverage": 10,
+        "accepted_returns": 10,
+        "attempted": 10,
+        "budget_violations": 0,
+        "design_tokens": 0,
+        "first_pass_validity": 1,
+        "hook_failures": 0,
+        "mean_rounds": 0,
+        "mean_tokens": 602.6,
+        "mean_wall_clock_s": 25.4653,
+        "requires_external_grade": 10,
+        "silent_given_accepted": 0.0,
+        "silent_handoff_rate": 0.0,
+        "silent_handoffs": 0,
+        "subagent_tokens": 6026,
+        "tool_denials": 0,
+        "total_tokens": 6026
+      },
+      "D": {
+        "accepted_return_coverage": 10,
+        "accepted_returns": 0,
+        "attempted": 10,
+        "budget_violations": 4,
+        "design_tokens": 31839,
+        "first_pass_validity": 0.4,
+        "hook_failures": 0,
+        "mean_rounds": 0.8,
+        "mean_tokens": 6294.6,
+        "mean_wall_clock_s": 145.5066,
+        "requires_external_grade": 0,
+        "silent_given_accepted": null,
+        "silent_handoff_rate": 0.0,
+        "silent_handoffs": 0,
+        "subagent_tokens": 31107,
+        "tool_denials": 48,
+        "total_tokens": 62946
+      }
+    },
+    "h2_pending": [
+      "B",
+      "C"
+    ],
+    "silent_handoff_difference_pp": {
+      "D_vs_A": {
+        "bootstrap_seed": 20261124,
+        "ci95": [
+          0,
+          0
+        ],
+        "difference": 0,
+        "excluded_left": 0,
+        "excluded_right": 0,
+        "matched_observations": 10,
+        "matched_seeds": [
+          1
+        ],
+        "matched_seeds_by_task": [
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:1"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:17"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:35"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:43"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:18"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:24"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:34"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:44"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "requests:30"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "requests:48"
+          }
+        ],
+        "matched_tasks": 10,
+        "resamples": 10000
+      }
+    }
+  }
+}

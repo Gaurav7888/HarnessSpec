@@ -175,3 +175,12 @@ class SubagentLoopTests(unittest.TestCase):
         action = action_from_reply("I will fix it now.", tokens=7, seconds=0.1)
         self.assertEqual(action.kind, "unparsed")
         self.assertEqual(action.tokens, 7)
+
+    def test_coding_loop_checks_remaining_steps_before_inference(self):
+        parent = reference_parent()
+        spec = harness_d("sample", "Read the source.", max_steps=1)
+        client = ScriptedModel('{"kind":"tool","tool":"read_file","permission":"read","path":"src/app.py"}')
+        with _copy() as directory:
+            outcome = run_subagent(spec, parent, Path(directory), 1, client)
+        self.assertEqual(len(client.calls), 1)
+        self.assertEqual(outcome["trace"].events[-1].code, "budget.exhausted")
