@@ -1,6 +1,6 @@
 """In-process verification hooks.
 
-The runtime admits three commands. Anything else is refused. There is no shell.
+The runtime admits four commands. Anything else is refused. There is no shell.
 """
 
 import ast
@@ -26,6 +26,8 @@ def run_hook(hook: dict, workspace: Path, context_include: list[str], timeout: f
     command = hook.get("command")
     if kind == "test" and command == "unittest":
         return _run_unittest(workspace, timeout)
+    if kind == "test" and command == "pytest":
+        return _run_pytest(workspace, timeout)
     if kind == "ast" and command == "ast.parse":
         return _run_ast(workspace, context_include)
     if kind == "lint" and command == "lint.bare-except":
@@ -57,6 +59,22 @@ def _run_unittest(workspace: Path, timeout: float) -> HookOutcome:
     )
     output = (completed.stdout + completed.stderr).strip()
     return HookOutcome("test", "unittest", completed.returncode == 0, output)
+
+
+def _run_pytest(workspace: Path, timeout: float) -> HookOutcome:
+    workspace = workspace.resolve()
+    completed = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", "--tb=line"],
+        cwd=workspace,
+        env={**_minimal_env(), "PYTHONPATH": str(workspace)},
+        capture_output=True,
+        text=True,
+        timeout=max(1.0, timeout),
+        shell=False,
+        check=False,
+    )
+    output = (completed.stdout + completed.stderr).strip()
+    return HookOutcome("test", "pytest", completed.returncode == 0, output)
 
 
 def _minimal_env() -> dict:

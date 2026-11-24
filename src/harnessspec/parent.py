@@ -16,6 +16,7 @@ HOOK_KINDS = ("test", "lint", "ast")
 # Commands the runtime knows how to execute. The compiler admits no others.
 ALLOWED_COMMANDS = {
     "unittest": "test",
+    "pytest": "test",
     "lint.bare-except": "lint",
     "ast.parse": "ast",
 }

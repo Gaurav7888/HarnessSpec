@@ -1,0 +1,52 @@
+{
+  "seed": 1,
+  "model": "grok-4.7-low",
+  "model_digest": "cursor-cli; no weight digest",
+  "token_accounting": "subagent_tokens is output tokens plus reasoning tokens, which is what the step budget charges. server_input_tokens is the CLI inputTokens figure and includes the agent preamble. The harness clock advances by duration_api_ms.",
+  "rows": [
+    {
+      "task_id": "off_by_one",
+      "benchmark": "fixture",
+      "designer": "A",
+      "seed": 1,
+      "model": "grok-4.7-low",
+      "model_digest": "cursor-cli; no weight digest",
+      "spec_source": "fixed_generic_harness",
+      "design_tokens": 0,
+      "subagent_tokens": 1720,
+      "rounds": 0,
+      "first_pass_valid": true,
+      "resolved": true,
+      "silent_handoff": false,
+      "budget_violations": 0,
+      "tool_denials": 0,
+      "hook_failures": 0,
+      "wall_clock_s": 226.384,
+      "server_input_tokens": 13877,
+      "server_output_tokens": 919,
+      "server_reasoning_tokens": 801
+    },
+    {
+      "task_id": "off_by_one",
+      "benchmark": "fixture",
+      "designer": "D",
+      "seed": 1,
+      "model": "grok-4.7-low",
+      "model_digest": "cursor-cli; no weight digest",
+      "spec_source": "harness_d",
+      "design_tokens": 0,
+      "subagent_tokens": 1461,
+      "rounds": 0,
+      "first_pass_valid": true,
+      "resolved": true,
+      "silent_handoff": false,
+      "budget_violations": 0,
+      "tool_denials": 0,
+      "hook_failures": 0,
+      "wall_clock_s": 228.756,
+      "server_input_tokens": 17126,
+      "server_output_tokens": 796,
+      "server_reasoning_tokens": 665
+    }
+  ]
+}

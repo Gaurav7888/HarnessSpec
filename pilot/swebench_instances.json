@@ -1,0 +1,107 @@
+{
+  "source": "princeton-nlp/SWE-bench_Verified test split, read from the Hugging Face datasets server on 2026-11-24",
+  "selection": "Ten instances from ten repositories. Each FAIL_TO_PASS id contains '::', so the test command is pytest. Django-style ids without '::' were left out. One FAIL_TO_PASS field, pylint-dev__pylint-4551, is stored as the dataset publishes it, including two node ids that are already truncated there.",
+  "instances": [
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "base_commit": "d16bfe05a744909de4b27f5875fe0d4ed41ce607",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "astropy/modeling/tests/test_separable.py::test_separable[compound_model6-result6]",
+        "astropy/modeling/tests/test_separable.py::test_separable[compound_model9-result9]"
+      ]
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-13989",
+      "repo": "matplotlib/matplotlib",
+      "base_commit": "a3e2897bfaf9eaac1d6649da535c4e721c89fa69",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "lib/matplotlib/tests/test_axes.py::test_hist_range_and_density"
+      ]
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3069",
+      "repo": "mwaskom/seaborn",
+      "base_commit": "54cab15bdacfaa05a88fbc5502a5b322d99f148e",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "tests/_core/test_plot.py::TestScaling::test_nominal_x_axis_tweaks",
+        "tests/_core/test_plot.py::TestScaling::test_nominal_y_axis_tweaks"
+      ]
+    },
+    {
+      "instance_id": "pallets__flask-5014",
+      "repo": "pallets/flask",
+      "base_commit": "7ee9ceb71e868944a46e1ff00b506772a53a4f1d",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "tests/test_blueprints.py::test_empty_name_not_allowed"
+      ]
+    },
+    {
+      "instance_id": "psf__requests-1142",
+      "repo": "psf/requests",
+      "base_commit": "22623bd8c265b78b161542663ee980738441c307",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "test_requests.py::RequestsTestCase::test_no_content_length"
+      ]
+    },
+    {
+      "instance_id": "pydata__xarray-2905",
+      "repo": "pydata/xarray",
+      "base_commit": "7c4e2ac83f7b4306296ff9b7b51aaf016e5ad614",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "xarray/tests/test_variable.py::TestAsCompatibleData::test_unsupported_type"
+      ]
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4551",
+      "repo": "pylint-dev/pylint",
+      "base_commit": "99589b08de8c5a2c6cc61e13a37420a868c80599",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "tests/unittest_pyreverse_writer.py::test_dot_files[packages_No_Name.dot]",
+        "tests/unittest_pyreverse_writer.py::test_dot_files[classes_No_Name.dot]",
+        "tests/unittest_pyreverse_writer.py::test_get_visibility[names0-special]",
+        "tests/unittest_pyreverse_writer.py::test_get_visibility[names1-private]",
+        "tests/unittest_pyreverse_writer.py::test_get_visibility[names2-public]",
+        "tests/unittest_pyreverse_writer.py::test_get_visibility[names3-protected]",
+        "tests/unittest_pyreverse_writer.py::test_get_annotation_annassign[a:",
+        "tests/unittest_pyreverse_writer.py::test_get_annotation_assignattr[def",
+        "tests/unittest_pyreverse_writer.py::test_infer_node_1",
+        "tests/unittest_pyreverse_writer.py::test_infer_node_2"
+      ]
+    },
+    {
+      "instance_id": "pytest-dev__pytest-10051",
+      "repo": "pytest-dev/pytest",
+      "base_commit": "aa55975c7d3f6c9f6d7f68accc41bb7cadf0eb9a",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "testing/logging/test_fixture.py::test_clear_for_call_stage"
+      ]
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-10297",
+      "repo": "scikit-learn/scikit-learn",
+      "base_commit": "b90661d6a46aa3619d3eec94d5281f5888add501",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "sklearn/linear_model/tests/test_ridge.py::test_ridge_classifier_cv_store_cv_values"
+      ]
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-10323",
+      "repo": "sphinx-doc/sphinx",
+      "base_commit": "31eba1a76dd485dc633cae48227b46879eda5df4",
+      "test_command": "pytest",
+      "fail_to_pass": [
+        "tests/test_directive_code.py::test_LiteralIncludeReader_dedent_and_append_and_prepend"
+      ]
+    }
+  ]
+}

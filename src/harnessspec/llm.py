@@ -24,10 +24,11 @@ class Reply:
     prompt_tokens: int
     output_tokens: int
     seconds: float
+    reasoning_tokens: int = 0
 
     @property
     def tokens(self) -> int:
-        return self.prompt_tokens + self.output_tokens
+        return self.prompt_tokens + self.output_tokens + self.reasoning_tokens
 
 
 def load_pin(path: Path = MODEL_PIN) -> dict:
