@@ -142,3 +142,13 @@ OpenAI Codex audited Dinesh's local work at the user's request. The prompt asked
 - Coding path: `SYSTEM_D` is unchanged. A test pins its hash to the version H3 v2 ran with, so H3 is unaffected. B and C are unaffected.
 - Prompt checked against output: two live D design calls on the first question in `pilot/sweqa_instances.json` (seed 1). After the first sentence, the spec was first-pass valid with `require_test_output: false` but kept a `pytest` hook, so the hook sentence was added. After the second, the spec was first-pass valid with no hooks and with `require_citations: true`. These calls are smoke checks, not results. The SWE-QA D rerun must be registered as a new experiment, and `sweqa-ad-v1` stays as reported.
 - Check: `PYTHONPATH=src python3 -m unittest discover -s tests -v` (99 tests) passes.
+
+## 2026-11-25 (B and C execution)
+
+- Tool: Claude Code (Claude Opus 5.5).
+- Task: `src/harnessspec/execution.py`, with `executable_spec(result, task, card)`, implements the B/C execution proposal in `docs/SWEQA_AUDIT.md` so that both runners share one rule.
+  - **B:** A's harness, with the brief verbatim as the goal.
+  - **C:** A's harness, with the tuple's instruction, context and tools as emitted. Permissions come from the parent card, paths are narrowed to each tool's grant, and the tuple's model must be the pinned one. Anything outside the card raises `NotExecutable` with a reason.
+  - **A and D:** run only when valid.
+  - C's H3 score is unchanged.
+- Check: `tests/test_execution.py` covers each rule and runs B and C specs end to end on the fixture with a scripted model. Offline, the six fixture B and C designs in `pilot/h3_transcripts_v2.json` were all executable under these rules. No model was called.
