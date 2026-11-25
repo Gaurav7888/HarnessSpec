@@ -1,0 +1,1999 @@
+[
+ {
+  "spec_id": "off_by_one",
+  "designer": "A",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "# Fixture workspace\n\n`src/app.py` returns `a + b + 1`. The acceptance test expects `a + b`.\n",
+    "acceptance_tests": [
+     {
+      "id": "suite",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests",
+     "README.md"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src",
+      "tests",
+      "README.md"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "list_dir",
+     "permission": "read",
+     "paths": [
+      "."
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 30,
+    "max_tokens": 8000,
+    "max_seconds": 120
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted"
+    ],
+    "on_exhaust": "stop",
+    "max_escalations": 0
+   },
+   "verification": {
+    "hooks": []
+   },
+   "return_contract": {
+    "require_citations": false,
+    "require_test_output": false,
+    "min_citations": 0
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": []
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "B",
+  "seed": 1,
+  "spec": {
+   "kind": "free_text",
+   "text": "**Task: Fix the Off-by-One Error**\n\n**Objective:**\nModify the `src/app.py` file so that it returns `a + b` instead of `a + b + 1`.\n\n**What You May Look At and Use:**\n- You can read files in the `src`, `tests`, and `README.md` directories using the `read_file` tool.\n- You can write files in the `src` directory using the `write_file` tool.\n- You can list the contents of the current directory using the `list_dir` tool.\n- You can run the tests in the `tests` directory using the `run_tests` tool.\n\n**How to Tell It Is Done:**\nThe task is complete when the `src/app.py` file has been modified to return `a + b` instead of `a + b + 1`, and the tests in the `tests` directory pass without any errors.\n\n**What to Report Back:**\nReport back with a brief description of the changes you made and the results of running the tests. Include any relevant output or error messages.",
+   "compiled": false
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 265,
+    "output_tokens": 225,
+    "seconds": 12.931,
+    "reply": "**Task: Fix the Off-by-One Error**\n\n**Objective:**\nModify the `src/app.py` file so that it returns `a + b` instead of `a + b + 1`.\n\n**What You May Look At and Use:**\n- You can read files in the `src`, `tests`, and `README.md` directories using the `read_file` tool.\n- You can write files in the `src` directory using the `write_file` tool.\n- You can list the contents of the current directory using the `list_dir` tool.\n- You can run the tests in the `tests` directory using the `run_tests` tool.\n\n**How to Tell It Is Done:**\nThe task is complete when the `src/app.py` file has been modified to return `a + b` instead of `a + b + 1`, and the tests in the `tests` directory pass without any errors.\n\n**What to Report Back:**\nReport back with a brief description of the changes you made and the results of running the tests. Include any relevant output or error messages."
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "C",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "Modify `src/app.py` to return `a + b` instead of `a + b + 1` and ensure the acceptance test still passes."
+   },
+   "context": {
+    "include": [
+     "src/app.py",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src/app.py",
+      "tests"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "read",
+     "paths": [
+      "src/app.py",
+      "tests"
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "read",
+     "paths": [
+      "src/app.py",
+      "tests"
+     ]
+    }
+   ],
+   "model": {
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 319,
+    "output_tokens": 83,
+    "seconds": 5.546,
+    "reply": "{\n  \"instruction\": \"Modify `src/app.py` to return `a + b` instead of `a + b + 1` and ensure the acceptance test still passes.\",\n  \"context\": [\"src/app.py\", \"tests\"],\n  \"tools\": [\"read_file\", \"write_file\", \"run_tests\"],\n  \"model\": \"qwen2.5-coder:7b\"\n}"
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "Fix the off-by-one error in `src/app.py` so that it returns `a + b` instead of `a + b + 1`.",
+    "acceptance_tests": [
+     {
+      "id": "test_off_by_one",
+      "command": "pytest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src/app.py",
+     "tests/test_app.py"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src",
+      "tests"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 15,
+    "max_tokens": 1000,
+    "max_seconds": 60
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted"
+    ],
+    "on_exhaust": "stop",
+    "max_escalations": 0
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "pytest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": false,
+    "require_test_output": true,
+    "min_citations": 0
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 1190,
+    "output_tokens": 413,
+    "seconds": 20.992,
+    "reply": "{\n  \"spec_version\": \"0.1\",\n  \"task_id\": \"off_by_one\",\n  \"goal\": {\n    \"statement\": \"Fix the off-by-one error in `src/app.py` so that it returns `a + b` instead of `a + b + 1`.\",\n    \"acceptance_tests\": [\n      {\n        \"id\": \"test_off_by_one\",\n        \"command\": \"pytest tests/test_app.py::test_off_by_one\"\n      }\n    ]\n  },\n  \"context\": {\n    \"include\": [\"src/app.py\", \"tests/test_app.py\"],\n    \"exclude\": []\n  },\n  \"tools\": [\n    {\n      \"name\": \"read_file\",\n      \"permission\": \"read\",\n      \"paths\": [\"src\", \"tests\"]\n    },\n    {\n      \"name\": \"write_file\",\n      \"permission\": \"write\",\n      \"paths\": [\"src\"]\n    },\n    {\n      \"name\": \"run_tests\",\n      \"permission\": \"exec\",\n      \"paths\": [\"tests\"]\n    }\n  ],\n  \"budgets\": {\n    \"max_steps\": 15,\n    \"max_tokens\": 1000,\n    \"max_seconds\": 60\n  },\n  \"stop\": {\n    \"conditions\": [\"acceptance_passed\", \"budget_exhausted\"],\n    \"on_exhaust\": \"stop\",\n    \"max_escalations\": 0\n  },\n  \"verification\": {\n    \"hooks\": [\n      {\n        \"kind\": \"test\",\n        \"command\": \"pytest tests/test_app.py::test_off_by_one\"\n      }\n    ]\n  },\n  \"return_contract\": {\n    \"require_citations\": false,\n    \"require_test_output\": true,\n    \"min_citations\": 0\n  },\n  \"model\": {\n    \"tier\": \"7-14B\",\n    \"name\": \"qwen2.5-coder:7b\",\n    \"digest\": \"...\"\n  }\n}"
+   },
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "command.unknown",
+     "schema.format"
+    ],
+    "cleared_by_compiler": [
+     "command.unknown",
+     "schema.format"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "A",
+  "seed": 2,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "# Fixture workspace\n\n`src/app.py` returns `a + b + 1`. The acceptance test expects `a + b`.\n",
+    "acceptance_tests": [
+     {
+      "id": "suite",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests",
+     "README.md"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src",
+      "tests",
+      "README.md"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "list_dir",
+     "permission": "read",
+     "paths": [
+      "."
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 30,
+    "max_tokens": 8000,
+    "max_seconds": 120
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted"
+    ],
+    "on_exhaust": "stop",
+    "max_escalations": 0
+   },
+   "verification": {
+    "hooks": []
+   },
+   "return_contract": {
+    "require_citations": false,
+    "require_test_output": false,
+    "min_citations": 0
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": []
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "B",
+  "seed": 2,
+  "spec": {
+   "kind": "free_text",
+   "text": "Fix the `src/app.py` file so that it returns `a + b` instead of `a + b + 1`. You may read the contents of `src/app.py` and `tests/test_app.py` to understand the current implementation and expected behavior. After making the necessary changes, run the tests to ensure that the fix does not introduce any new issues. Once you are confident that the fix is correct, report back with a message indicating that the task is complete.",
+   "compiled": false
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 265,
+    "output_tokens": 98,
+    "seconds": 4.781,
+    "reply": "Fix the `src/app.py` file so that it returns `a + b` instead of `a + b + 1`. You may read the contents of `src/app.py` and `tests/test_app.py` to understand the current implementation and expected behavior. After making the necessary changes, run the tests to ensure that the fix does not introduce any new issues. Once you are confident that the fix is correct, report back with a message indicating that the task is complete."
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "C",
+  "seed": 2,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "Modify the `src/app.py` file to return `a + b` instead of `a + b + 1`. Ensure the change does not break any existing tests."
+   },
+   "context": {
+    "include": [
+     "src/app.py",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src/app.py",
+      "tests"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "read",
+     "paths": [
+      "src/app.py",
+      "tests"
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "read",
+     "paths": [
+      "src/app.py",
+      "tests"
+     ]
+    }
+   ],
+   "model": {
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 319,
+    "output_tokens": 87,
+    "seconds": 4.228,
+    "reply": "{\n  \"instruction\": \"Modify the `src/app.py` file to return `a + b` instead of `a + b + 1`. Ensure the change does not break any existing tests.\",\n  \"context\": [\"src/app.py\", \"tests\"],\n  \"tools\": [\"read_file\", \"write_file\", \"run_tests\"],\n  \"model\": \"qwen2.5-coder:7b\"\n}"
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "D",
+  "seed": 2,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "Fix the off-by-one error in the function that returns `a + b + 1` in `src/app.py` so it returns `a + b`.",
+    "acceptance_tests": [
+     {
+      "id": "test_off_by_one",
+      "command": "pytest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src/app.py",
+     "tests/test_app.py"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src",
+      "tests"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 15,
+    "max_tokens": 1000,
+    "max_seconds": 60
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted"
+    ],
+    "on_exhaust": "stop",
+    "max_escalations": 0
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "pytest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": false,
+    "require_test_output": true,
+    "min_citations": 0
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 1190,
+    "output_tokens": 415,
+    "seconds": 21.204,
+    "reply": "{\n  \"spec_version\": \"0.1\",\n  \"task_id\": \"off_by_one\",\n  \"goal\": {\n    \"statement\": \"Fix the off-by-one error in the function that returns `a + b + 1` in `src/app.py` so it returns `a + b`.\",\n    \"acceptance_tests\": [\n      {\n        \"id\": \"test_off_by_one\",\n        \"command\": \"pytest tests/test_app.py::test_off_by_one\"\n      }\n    ]\n  },\n  \"context\": {\n    \"include\": [\"src/app.py\", \"tests/test_app.py\"],\n    \"exclude\": []\n  },\n  \"tools\": [\n    {\n      \"name\": \"read_file\",\n      \"permission\": \"read\",\n      \"paths\": [\"src\", \"tests\"]\n    },\n    {\n      \"name\": \"write_file\",\n      \"permission\": \"write\",\n      \"paths\": [\"src\"]\n    },\n    {\n      \"name\": \"run_tests\",\n      \"permission\": \"exec\",\n      \"paths\": [\"tests\"]\n    }\n  ],\n  \"budgets\": {\n    \"max_steps\": 15,\n    \"max_tokens\": 1000,\n    \"max_seconds\": 60\n  },\n  \"stop\": {\n    \"conditions\": [\"acceptance_passed\", \"budget_exhausted\"],\n    \"on_exhaust\": \"stop\",\n    \"max_escalations\": 0\n  },\n  \"verification\": {\n    \"hooks\": [\n      {\n        \"kind\": \"test\",\n        \"command\": \"pytest tests/test_app.py::test_off_by_one\"\n      }\n    ]\n  },\n  \"return_contract\": {\n    \"require_citations\": false,\n    \"require_test_output\": true,\n    \"min_citations\": 0\n  },\n  \"model\": {\n    \"tier\": \"7-14B\",\n    \"name\": \"qwen2.5-coder:7b\",\n    \"digest\": \"...\"\n  }\n}"
+   },
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "command.unknown",
+     "schema.format"
+    ],
+    "cleared_by_compiler": [
+     "command.unknown",
+     "schema.format"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "A",
+  "seed": 3,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "# Fixture workspace\n\n`src/app.py` returns `a + b + 1`. The acceptance test expects `a + b`.\n",
+    "acceptance_tests": [
+     {
+      "id": "suite",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests",
+     "README.md"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src",
+      "tests",
+      "README.md"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "list_dir",
+     "permission": "read",
+     "paths": [
+      "."
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 30,
+    "max_tokens": 8000,
+    "max_seconds": 120
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted"
+    ],
+    "on_exhaust": "stop",
+    "max_escalations": 0
+   },
+   "verification": {
+    "hooks": []
+   },
+   "return_contract": {
+    "require_citations": false,
+    "require_test_output": false,
+    "min_citations": 0
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": []
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "B",
+  "seed": 3,
+  "spec": {
+   "kind": "free_text",
+   "text": "Fix the function in `src/app.py` so that it returns `a + b` instead of `a + b + 1`. You may read the code and tests in the `src` and `tests` directories, and you may write to the `src` directory. Once you have made the change, run the tests to ensure that the fix works as expected. When you are done, report back with a message indicating that the task is complete.",
+   "compiled": false
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 265,
+    "output_tokens": 94,
+    "seconds": 4.417,
+    "reply": "Fix the function in `src/app.py` so that it returns `a + b` instead of `a + b + 1`. You may read the code and tests in the `src` and `tests` directories, and you may write to the `src` directory. Once you have made the change, run the tests to ensure that the fix works as expected. When you are done, report back with a message indicating that the task is complete."
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "C",
+  "seed": 3,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "Modify the `src/app.py` file to return `a + b` instead of `a + b + 1`. Ensure that the change does not affect the functionality of the application."
+   },
+   "context": {
+    "include": [
+     "src/app.py"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "write_file",
+     "permission": "read",
+     "paths": [
+      "src/app.py"
+     ]
+    }
+   ],
+   "model": {
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 319,
+    "output_tokens": 79,
+    "seconds": 3.727,
+    "reply": "{\n  \"instruction\": \"Modify the `src/app.py` file to return `a + b` instead of `a + b + 1`. Ensure that the change does not affect the functionality of the application.\",\n  \"context\": [\"src/app.py\"],\n  \"tools\": [\"write_file\"],\n  \"model\": \"qwen2.5-coder:7b\"\n}"
+   }
+  ]
+ },
+ {
+  "spec_id": "off_by_one",
+  "designer": "D",
+  "seed": 3,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "off_by_one",
+   "goal": {
+    "statement": "Fix the off-by-one error in `src/app.py` so that it returns `a + b` instead of `a + b + 1`.",
+    "acceptance_tests": [
+     {
+      "id": "test_off_by_one",
+      "command": "pytest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src/app.py",
+     "tests/test_app.py"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src",
+      "tests"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 30,
+    "max_tokens": 8000,
+    "max_seconds": 120
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted"
+    ],
+    "on_exhaust": "stop",
+    "max_escalations": 0
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "pytest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": false,
+    "require_test_output": true,
+    "min_citations": 0
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 0,
+    "kind": "design",
+    "prompt_tokens": 1190,
+    "output_tokens": 408,
+    "seconds": 20.415,
+    "reply": "{\n  \"spec_version\": \"0.1\",\n  \"task_id\": \"off_by_one\",\n  \"goal\": {\n    \"statement\": \"Fix the off-by-one error in `src/app.py` so that it returns `a + b` instead of `a + b + 1`.\",\n    \"acceptance_tests\": [\n      {\n        \"id\": \"test_off_by_one\",\n        \"command\": \"pytest tests/test_app.py::test_off_by_one\"\n      }\n    ]\n  },\n  \"context\": {\n    \"include\": [\"src/app.py\", \"tests/test_app.py\"],\n    \"exclude\": []\n  },\n  \"tools\": [\n    {\n      \"name\": \"read_file\",\n      \"permission\": \"read\",\n      \"paths\": [\"src\", \"tests\"]\n    },\n    {\n      \"name\": \"write_file\",\n      \"permission\": \"write\",\n      \"paths\": [\"src\"]\n    },\n    {\n      \"name\": \"run_tests\",\n      \"permission\": \"exec\",\n      \"paths\": [\"tests\"]\n    }\n  ],\n  \"budgets\": {\n    \"max_steps\": 30,\n    \"max_tokens\": 8000,\n    \"max_seconds\": 120\n  },\n  \"stop\": {\n    \"conditions\": [\"acceptance_passed\", \"budget_exhausted\"],\n    \"on_exhaust\": \"stop\",\n    \"max_escalations\": 0\n  },\n  \"verification\": {\n    \"hooks\": [\n      {\n        \"kind\": \"test\",\n        \"command\": \"pytest tests/test_app.py::test_off_by_one\"\n      }\n    ]\n  },\n  \"return_contract\": {\n    \"require_citations\": false,\n    \"require_test_output\": true,\n    \"min_citations\": 0\n  },\n  \"model\": {\n    \"tier\": \"7-14B\",\n    \"name\": \"qwen2.5-coder:7b\"\n  }\n}"
+   },
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "command.unknown"
+    ],
+    "cleared_by_compiler": [
+     "command.unknown"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "valid_basic",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": []
+ },
+ {
+  "spec_id": "valid_exec_test_tool",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": []
+ },
+ {
+  "spec_id": "valid_tight_budget",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 1,
+    "max_tokens": 1,
+    "max_seconds": 1
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": []
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": []
+ },
+ {
+  "spec_id": "valid_escalate",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "escalate"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 2
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": []
+ },
+ {
+  "spec_id": "unknown_tool",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "tool.unknown"
+    ],
+    "cleared_by_compiler": [
+     "tool.unknown"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "privilege_exec_on_write_tool",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "tool.privilege"
+    ],
+    "cleared_by_compiler": [
+     "tool.privilege"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "steps_above_parent",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 30,
+    "max_tokens": 8000,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "budget.above_parent"
+    ],
+    "cleared_by_compiler": [
+     "budget.above_parent"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "tokens_below_steps",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 10,
+    "max_tokens": 10,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "budget.infeasible"
+    ],
+    "cleared_by_compiler": [
+     "budget.infeasible"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "no_acceptance_tests",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum.",
+    "acceptance_tests": [
+     {
+      "id": "suite",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "repair",
+    "prompt_tokens": 1503,
+    "output_tokens": 322,
+    "seconds": 23.178,
+    "reply": "{\n  \"spec_version\": \"0.1\",\n  \"task_id\": \"corpus\",\n  \"goal\": {\n    \"statement\": \"Make add return the sum.\",\n    \"acceptance_tests\": [\n      {\n        \"id\": \"suite\",\n        \"command\": \"unittest\"\n      }\n    ]\n  },\n  \"context\": {\n    \"include\": [\"src\", \"tests\"],\n    \"exclude\": []\n  },\n  \"tools\": [\n    {\n      \"name\": \"read_file\",\n      \"permission\": \"read\",\n      \"paths\": [\"src\"]\n    },\n    {\n      \"name\": \"write_file\",\n      \"permission\": \"write\",\n      \"paths\": [\"src\"]\n    }\n  ],\n  \"budgets\": {\n    \"max_steps\": 8,\n    \"max_tokens\": 1500,\n    \"max_seconds\": 30\n  },\n  \"stop\": {\n    \"conditions\": [\"acceptance_passed\", \"budget_exhausted\", \"return_rejected\"],\n    \"on_exhaust\": \"escalate\",\n    \"max_escalations\": 1\n  },\n  \"verification\": {\n    \"hooks\": [\n      {\n        \"kind\": \"test\",\n        \"command\": \"unittest\"\n      }\n    ]\n  },\n  \"return_contract\": {\n    \"require_citations\": true,\n    \"require_test_output\": true,\n    \"min_citations\": 1\n  },\n  \"model\": {\n    \"tier\": \"7-14B\",\n    \"name\": \"fixture-small\"\n  }\n}",
+    "errors_before": [
+     "goal.acceptance_tests"
+    ],
+    "cleared_by_compiler": [],
+    "sent_to_model": [
+     "goal.acceptance_tests"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "bad_tier",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "huge"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "model.tier"
+    ],
+    "cleared_by_compiler": [
+     "model.tier"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "context_escape",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src/app.py"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "repair",
+    "prompt_tokens": 1496,
+    "output_tokens": 332,
+    "seconds": 18.521,
+    "reply": "{\n  \"spec_version\": \"0.1\",\n  \"task_id\": \"corpus\",\n  \"goal\": {\n    \"statement\": \"Make add return the sum of its arguments.\",\n    \"acceptance_tests\": [\n      {\n        \"id\": \"add\",\n        \"command\": \"unittest\"\n      }\n    ]\n  },\n  \"context\": {\n    \"include\": [\"src/app.py\"],\n    \"exclude\": []\n  },\n  \"tools\": [\n    {\n      \"name\": \"read_file\",\n      \"permission\": \"read\",\n      \"paths\": [\"src\"]\n    },\n    {\n      \"name\": \"write_file\",\n      \"permission\": \"write\",\n      \"paths\": [\"src\"]\n    }\n  ],\n  \"budgets\": {\n    \"max_steps\": 8,\n    \"max_tokens\": 1500,\n    \"max_seconds\": 30\n  },\n  \"stop\": {\n    \"conditions\": [\"acceptance_passed\", \"budget_exhausted\", \"return_rejected\"],\n    \"on_exhaust\": \"escalate\",\n    \"max_escalations\": 1\n  },\n  \"verification\": {\n    \"hooks\": [\n      {\n        \"kind\": \"test\",\n        \"command\": \"unittest\"\n      }\n    ]\n  },\n  \"return_contract\": {\n    \"require_citations\": true,\n    \"require_test_output\": true,\n    \"min_citations\": 1\n  },\n  \"model\": {\n    \"tier\": \"7-14B\",\n    \"name\": \"qwen2.5-coder:7b\"\n  }\n}",
+    "errors_before": [
+     "context.path"
+    ],
+    "cleared_by_compiler": [
+     "context.path"
+    ],
+    "sent_to_model": [
+     "context.empty"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "extra_field",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "schema.extra"
+    ],
+    "cleared_by_compiler": [
+     "schema.extra"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "aorchestra_tuple",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "tuple",
+   "goal": {
+    "statement": "Fix the adder.",
+    "acceptance_tests": [
+     {
+      "id": "suite",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "model": {
+    "name": "qwen2.5:7b",
+    "tier": "7-14B"
+   },
+   "budgets": {
+    "max_steps": 15,
+    "max_tokens": 3000,
+    "max_seconds": 60
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": []
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "repair",
+    "prompt_tokens": 1464,
+    "output_tokens": 278,
+    "seconds": 23.957,
+    "reply": "{\n  \"spec_version\": \"0.1\",\n  \"task_id\": \"tuple\",\n  \"goal\": {\n    \"statement\": \"Fix the adder.\",\n    \"acceptance_tests\": [\n      {\n        \"id\": \"suite\",\n        \"command\": \"unittest\"\n      }\n    ]\n  },\n  \"context\": {\n    \"include\": [\"src\"],\n    \"exclude\": []\n  },\n  \"tools\": [\n    {\n      \"name\": \"read_file\",\n      \"permission\": \"read\",\n      \"paths\": [\"src\"]\n    }\n  ],\n  \"model\": {\n    \"name\": \"qwen2.5:7b\",\n    \"tier\": \"7-14B\"\n  },\n  \"budgets\": {\n    \"max_steps\": 15,\n    \"max_tokens\": 3000,\n    \"max_seconds\": 60\n  },\n  \"stop\": {\n    \"conditions\": [\"acceptance_passed\", \"budget_exhausted\", \"return_rejected\"],\n    \"on_exhaust\": \"escalate\",\n    \"max_escalations\": 1\n  },\n  \"verification\": {\n    \"hooks\": []\n  },\n  \"return_contract\": {\n    \"require_citations\": true,\n    \"require_test_output\": true,\n    \"min_citations\": 1\n  }\n}",
+    "errors_before": [
+     "model.tier",
+     "schema.missing"
+    ],
+    "cleared_by_compiler": [
+     "model.tier"
+    ],
+    "sent_to_model": [
+     "schema.missing"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "empty_goal",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Fix the function in src/app.py to return `a + b` instead of `a + b + 1`.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "pytest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "read_file",
+     "permission": "read",
+     "paths": [
+      "src",
+      "tests"
+     ]
+    },
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    },
+    {
+     "name": "run_tests",
+     "permission": "exec",
+     "paths": [
+      "tests"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 30,
+    "max_tokens": 8000,
+    "max_seconds": 120
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "hook_failed",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "pytest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "qwen2.5-coder:7b"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "repair",
+    "prompt_tokens": 1475,
+    "output_tokens": 398,
+    "seconds": 26.368,
+    "reply": "{\n  \"spec_version\": \"0.1\",\n  \"task_id\": \"corpus\",\n  \"goal\": {\n    \"statement\": \"Fix the function in src/app.py to return `a + b` instead of `a + b + 1`.\",\n    \"acceptance_tests\": [\n      {\n        \"id\": \"add\",\n        \"command\": \"pytest tests/test_app.py::test_add\"\n      }\n    ]\n  },\n  \"context\": {\n    \"include\": [\"src\", \"tests\"],\n    \"exclude\": []\n  },\n  \"tools\": [\n    {\n      \"name\": \"read_file\",\n      \"permission\": \"read\",\n      \"paths\": [\"src\", \"tests\"]\n    },\n    {\n      \"name\": \"write_file\",\n      \"permission\": \"write\",\n      \"paths\": [\"src\"]\n    },\n    {\n      \"name\": \"run_tests\",\n      \"permission\": \"exec\",\n      \"paths\": [\"tests\"]\n    }\n  ],\n  \"budgets\": {\n    \"max_steps\": 30,\n    \"max_tokens\": 8000,\n    \"max_seconds\": 120\n  },\n  \"stop\": {\n    \"conditions\": [\"acceptance_passed\", \"budget_exhausted\", \"hook_failed\", \"return_rejected\"],\n    \"on_exhaust\": \"escalate\",\n    \"max_escalations\": 1\n  },\n  \"verification\": {\n    \"hooks\": [\n      {\n        \"kind\": \"test\",\n        \"command\": \"pytest tests/test_app.py::test_add\"\n      }\n    ]\n  },\n  \"return_contract\": {\n    \"require_citations\": true,\n    \"require_test_output\": true,\n    \"min_citations\": 1\n  },\n  \"model\": {\n    \"tier\": \"7-14B\",\n    \"name\": \"qwen2.5-coder:7b\"\n  }\n}",
+    "errors_before": [
+     "goal.empty"
+    ],
+    "cleared_by_compiler": [],
+    "sent_to_model": [
+     "goal.empty"
+    ],
+    "errors_after": [
+     "command.unknown"
+    ]
+   },
+   {
+    "round": 2,
+    "kind": "compiler",
+    "errors_before": [
+     "command.unknown"
+    ],
+    "cleared_by_compiler": [
+     "command.unknown"
+    ],
+    "errors_after": []
+   }
+  ]
+ },
+ {
+  "spec_id": "write_path_outside_grant",
+  "designer": "D",
+  "seed": 1,
+  "spec": {
+   "spec_version": "0.1",
+   "task_id": "corpus",
+   "goal": {
+    "statement": "Make add return the sum of its arguments.",
+    "acceptance_tests": [
+     {
+      "id": "add",
+      "command": "unittest"
+     }
+    ]
+   },
+   "context": {
+    "include": [
+     "src",
+     "tests"
+    ],
+    "exclude": []
+   },
+   "tools": [
+    {
+     "name": "write_file",
+     "permission": "write",
+     "paths": [
+      "src"
+     ]
+    }
+   ],
+   "budgets": {
+    "max_steps": 8,
+    "max_tokens": 1500,
+    "max_seconds": 30
+   },
+   "stop": {
+    "conditions": [
+     "acceptance_passed",
+     "budget_exhausted",
+     "return_rejected"
+    ],
+    "on_exhaust": "escalate",
+    "max_escalations": 1
+   },
+   "verification": {
+    "hooks": [
+     {
+      "kind": "test",
+      "command": "unittest"
+     }
+    ]
+   },
+   "return_contract": {
+    "require_citations": true,
+    "require_test_output": true,
+    "min_citations": 1
+   },
+   "model": {
+    "tier": "7-14B",
+    "name": "fixture-small"
+   }
+  },
+  "log": [
+   {
+    "round": 1,
+    "kind": "compiler",
+    "errors_before": [
+     "tool.path"
+    ],
+    "cleared_by_compiler": [
+     "tool.path"
+    ],
+    "errors_after": []
+   }
+  ]
+ }
+]

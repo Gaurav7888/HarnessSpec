@@ -3,13 +3,21 @@
 The repairer fills defaults and clamps privileges. It does not invent a goal,
 an acceptance test, or a context slice. Those stay invalid so a four-field
 delegation tuple cannot become a HarnessSpec by compiler fiat.
+
+It also reduces a command to its allowlisted name when the writer appended
+arguments: ``pytest tests/x.py::t`` and ``python -m pytest -q`` become
+``pytest``. The runtime runs named commands only, and the tests a task
+selects come from the task (for SWE-bench, its fail-to-pass list), not from
+the spec, so the arguments carry nothing the runtime could use. A command
+whose name is not on the allowlist, or is of the wrong kind for its hook,
+is left as written.
 """
 
 from copy import deepcopy
 from dataclasses import dataclass, field
 
 from harnessspec.errors import SpecError
-from harnessspec.parent import PERMISSION_RANK, TIERS, CapabilityCard
+from harnessspec.parent import ALLOWED_COMMANDS, PERMISSION_RANK, TIERS, CapabilityCard
 from harnessspec.paths import is_relative_safe, within_any
 from harnessspec.validator import SPEC_VERSION, TOP_LEVEL_FIELDS, validate
 
@@ -78,7 +86,47 @@ def repair_once(spec: dict, errors: list[SpecError], parent: CapabilityCard) -> 
     _repair_budgets(nxt, parent)
     _repair_model(nxt, parent, codes)
     _repair_digest(nxt, codes)
+    if "command.unknown" in codes:
+        _repair_commands(nxt)
     return nxt
+
+
+def command_name(command, kind: str | None = None) -> str | None:
+    """The allowlisted name a command string starts with, or None.
+
+    Accepts ``NAME args...`` and ``python[3] -m NAME args...``. With ``kind``,
+    the name must be of that kind.
+    """
+    if not isinstance(command, str):
+        return None
+    words = command.split()
+    if len(words) >= 3 and words[0] in ("python", "python3") and words[1] == "-m":
+        words = words[2:]
+    if not words or words[0] not in ALLOWED_COMMANDS:
+        return None
+    name = words[0]
+    if kind is not None and ALLOWED_COMMANDS[name] != kind:
+        return None
+    return name
+
+
+def _repair_commands(spec: dict) -> None:
+    goal = spec.get("goal")
+    tests = goal.get("acceptance_tests") if isinstance(goal, dict) else None
+    if isinstance(tests, list):
+        for test in tests:
+            if isinstance(test, dict) and test.get("command") not in ALLOWED_COMMANDS:
+                name = command_name(test.get("command"))
+                if name is not None:
+                    test["command"] = name
+    verification = spec.get("verification")
+    hooks = verification.get("hooks") if isinstance(verification, dict) else None
+    if isinstance(hooks, list):
+        for hook in hooks:
+            if isinstance(hook, dict) and hook.get("command") not in ALLOWED_COMMANDS:
+                name = command_name(hook.get("command"), hook.get("kind"))
+                if name is not None:
+                    hook["command"] = name
 
 
 def _strip_unknown(spec: dict) -> None:

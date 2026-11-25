@@ -9,12 +9,15 @@ from harnessspec.llm import load_pin
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "pilot" / "h3_results.json"
+RESULTS_V2 = ROOT / "pilot" / "h3_results_v2.json"
 
 
 @unittest.skipUnless(RESULTS.exists(), "pilot/h3_results.json not generated yet")
 class H3ResultsTests(unittest.TestCase):
+    path = RESULTS
+
     def setUp(self):
-        self.payload = json.loads(RESULTS.read_text(encoding="utf-8"))
+        self.payload = json.loads(self.path.read_text(encoding="utf-8"))
         self.rows = self.payload["rows"]
 
     def test_summary_is_recomputed_from_rows(self):
@@ -40,6 +43,16 @@ class H3ResultsTests(unittest.TestCase):
             if row["designer"] == "C":
                 self.assertEqual(row["rounds"], 0)
             self.assertLessEqual(row["rounds"], 3)
+
+
+@unittest.skipUnless(RESULTS_V2.exists(), "pilot/h3_results_v2.json not generated yet")
+class H3ResultsV2Tests(H3ResultsTests):
+    path = RESULTS_V2
+
+    def test_v2_records_the_allowlist_it_ran_with(self):
+        from harnessspec.parent import ALLOWED_COMMANDS
+
+        self.assertEqual(self.payload["allowed_commands"], sorted(ALLOWED_COMMANDS))
 
 
 if __name__ == "__main__":

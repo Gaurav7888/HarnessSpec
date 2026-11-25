@@ -140,7 +140,8 @@ class DesignTests(unittest.TestCase):
 
     def test_repair_prompt_names_the_allowed_commands(self):
         draft = valid_spec()
-        draft["goal"]["acceptance_tests"] = [{"id": "t", "command": "python -m unittest"}]
+        # A name the compiler cannot reduce, so the hint has to reach the model.
+        draft["goal"]["acceptance_tests"] = [{"id": "t", "command": "make test"}]
         model = ScriptedModel(draft, valid_spec())
         design(self.task, self.card, "D", seed=1, client=model)
         repair_prompt = model.calls[1]["messages"][-1]["content"]
@@ -170,3 +171,53 @@ class DesignTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CommandRepairTests(unittest.TestCase):
+    """The compiler reduces an allowlisted command with arguments to its name."""
+
+    def setUp(self):
+        self.card = reference_parent()
+
+    def _spec(self, test_command, hook_command, hook_kind="test"):
+        spec = valid_spec()
+        spec["goal"]["acceptance_tests"] = [{"id": "t", "command": test_command}]
+        spec["verification"]["hooks"] = [{"kind": hook_kind, "command": hook_command}]
+        return spec
+
+    def test_selector_arguments_are_dropped(self):
+        from harnessspec.repair import repair_until_valid
+
+        spec = self._spec("pytest tests/test_app.py::test_add", "pytest -q")
+        outcome = repair_until_valid(spec, self.card)
+        self.assertTrue(outcome.valid)
+        self.assertEqual(outcome.spec["goal"]["acceptance_tests"][0]["command"], "pytest")
+        self.assertEqual(outcome.spec["verification"]["hooks"][0]["command"], "pytest")
+
+    def test_python_dash_m_form_is_reduced(self):
+        from harnessspec.repair import repair_until_valid
+
+        spec = self._spec("python -m unittest tests.test_app", "python3 -m unittest")
+        outcome = repair_until_valid(spec, self.card)
+        self.assertTrue(outcome.valid)
+        self.assertEqual(outcome.spec["goal"]["acceptance_tests"][0]["command"], "unittest")
+
+    def test_unknown_names_and_wrong_kinds_stay_invalid(self):
+        from harnessspec.repair import command_name, repair_until_valid
+
+        self.assertIsNone(command_name("run_tests"))
+        self.assertIsNone(command_name("bash -c pytest"))
+        self.assertIsNone(command_name("pytest", kind="ast"))
+        spec = self._spec("make test", "pytest", hook_kind="ast")
+        outcome = repair_until_valid(spec, self.card)
+        self.assertFalse(outcome.valid)
+        self.assertEqual({e.code for e in outcome.remaining}, {"command.unknown"})
+
+    def test_d_clears_a_selector_without_a_model_round(self):
+        draft = valid_spec()
+        draft["goal"]["acceptance_tests"] = [{"id": "t", "command": "pytest tests/x.py::t"}]
+        model = ScriptedModel(draft)
+        result = design(fixture_task(), self.card, "D", seed=1, client=model)
+        self.assertFalse(result["first_pass_valid"])
+        self.assertTrue(result["valid"])
+        self.assertEqual(len(model.calls), 1)

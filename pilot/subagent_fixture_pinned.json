@@ -1,0 +1,52 @@
+{
+  "seed": 1,
+  "model": "qwen2.5-coder:7b",
+  "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+  "options": {
+    "num_ctx": 16384,
+    "temperature": 0.2
+  },
+  "token_accounting": "subagent_tokens is the server's prompt plus output count over every step. budget_charged_tokens is what the step budget charged: generated tokens only, as in pilot/run_sweqa.py. design_tokens comes from design().",
+  "rows": [
+    {
+      "task_id": "off_by_one",
+      "benchmark": "fixture",
+      "designer": "A",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "spec_source": "fixed_generic_harness",
+      "design_tokens": 0,
+      "subagent_tokens": 1239,
+      "rounds": 0,
+      "first_pass_valid": true,
+      "resolved": true,
+      "silent_handoff": false,
+      "budget_violations": 0,
+      "tool_denials": 0,
+      "hook_failures": 0,
+      "wall_clock_s": 9.652,
+      "budget_charged_tokens": 158
+    },
+    {
+      "task_id": "off_by_one",
+      "benchmark": "fixture",
+      "designer": "D",
+      "seed": 1,
+      "model": "qwen2.5-coder:7b",
+      "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+      "spec_source": "design",
+      "design_tokens": 1603,
+      "subagent_tokens": 1770,
+      "rounds": 1,
+      "first_pass_valid": false,
+      "resolved": true,
+      "silent_handoff": false,
+      "budget_violations": 0,
+      "tool_denials": 0,
+      "hook_failures": 0,
+      "wall_clock_s": 38.113,
+      "budget_charged_tokens": 190
+    }
+  ]
+}
