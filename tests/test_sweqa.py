@@ -13,7 +13,7 @@ from harnessspec.llm import Reply, load_pin
 from harnessspec.results import read_results
 from harnessspec.runtime import Action, Session
 from harnessspec.sweqa import parse_manifest, read_only_card, source_snapshot
-from pilot.run_sweqa import (RUBRIC, execute, finalized_row, run_attempt, task_prompt)
+from pilot.run_sweqa import (RUBRIC, execute, finalized_row, run_attempt, source_verified_silent, task_prompt)
 from pilot.select_sweqa import evidence
 
 
@@ -129,6 +129,49 @@ class SweqaTests(unittest.TestCase):
         self.assertIn("remaining seconds", client.requests[-1])
         self.assertNotIn("GOLD_ANSWER", str(client.requests))
         self.assertNotIn("secret/gold.py", str(client.requests))
+
+    def test_brief_and_tuple_execute_as_emitted(self):
+        emitted = {"instruction": "Inspect this package", "context": ["."],
+                   "tools": ["read_file"], "model": load_pin()["name"]}
+        for designer, first in [("B", emitted["instruction"]), ("C", emitted)]:
+            with self.subTest(designer=designer):
+                client = Client([response(first), response({"kind": "return", "summary": "answer"})])
+                run = run_attempt(instance(), designer, 1, load_pin(), self.root, client)
+                self.assertTrue(run["diagnostics"]["return_accepted"])
+                self.assertEqual(run["executable_spec"]["goal"]["statement"], emitted["instruction"])
+                self.assertIsNone(run["diagnostics"]["not_executable"])
+                self.assertIs(run["row"]["first_pass_valid"], False)
+                self.assertEqual(run["diagnostics"]["compiled_validity_applicable"], designer == "C")
+                self.assertEqual(run["row"]["design_tokens"], 13)
+                self.assertEqual(run["row"]["subagent_tokens"], 13)
+                if designer == "C":
+                    self.assertFalse(run["design"]["valid"])
+                    self.assertEqual([t["name"] for t in run["executable_spec"]["tools"]], ["read_file"])
+
+    def test_rejected_tuple_retains_actual_cost(self):
+        client = Client([response({"instruction": "read", "context": ["."], "tools": ["shell"],
+                                   "model": load_pin()["name"]})])
+        run = run_attempt(instance(), "C", 1, load_pin(), self.root, client)
+        error = run["diagnostics"]["not_executable"]
+        self.assertEqual(error["reason"], "tuple.tool")
+        self.assertIn("shell", error["detail"])
+        self.assertFalse(finalized_row(run, {})["resolved"])
+        self.assertEqual((run["row"]["design_tokens"], run["row"]["subagent_tokens"]), (13, 0))
+        self.assertIsNone(run["runtime_trace"])
+
+    def test_silent_requires_an_accepted_summary_and_counts_verified_lines(self):
+        for file, line, usable in [("missing.py", 1, 0), ("secret/gold.py", 3, 0),
+                                   ("secret/gold.py", 2, 1)]:
+            with self.subTest(file=file, line=line):
+                answer = {"kind": "return", "summary": "answer", "citations": [{"file": file, "line": line}]}
+                run = run_attempt(instance(), "A", 1, load_pin(), self.root, Client([response(answer)]))
+                self.assertTrue(run["diagnostics"]["return_accepted"])
+                self.assertFalse(run["diagnostics"]["format_silent_handoff"])
+                self.assertEqual(run["evidence"]["usable_repository_citations"], usable)
+                self.assertEqual(run["row"]["silent_handoff"], usable == 0)
+        self.assertFalse(source_verified_silent(True, None, None))
+        self.assertFalse(source_verified_silent(True, {"summary": " "}, None))
+        self.assertFalse(source_verified_silent(False, {"summary": "rejected"}, None))
 
     def test_reads_cited_lines_past_the_default_output_cap(self):
         (self.root / "secret/gold.py").write_text("# filler\n" * 1500 + "final_total = 42\n")
