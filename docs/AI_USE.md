@@ -179,3 +179,26 @@ The A/D seed-1 checkpoint completed all 20 attempts using Ollama 0.40.14. The au
 The four-condition seed-1 checkpoint completed at 19:36 IST. The public aggregate covers 40 attempts with 17 pending answers and 23 finalized failures. D exceeded both B and C by 50 percentage points in source-verified silence per attempt (paired 95% interval [20, 80] points for each comparison). This seed points in the opposite direction to the H2 prediction. All three B and all three C accepted answers had a verified citation. No semantic grades were available. The cumulative selection for seed 2 started after the checked seed-1 aggregate was committed and pushed.
 
 The two-seed checkpoint covers 80 distinct executions across the four conditions. Source-verified silence per attempt was 4/20 for A, 2/20 for B, 0/20 for C and 10/20 for D. The D/B difference was +40 points [20, 60] and D/C was +50 [30, 70] using paired task clusters. Thirty-six accepted answers await grading. The updated ACM layout includes citation coverage, grounded return rates and runtime diagnostics. It compiled to three pages. The final 40-identity seed-3 batch began after the aggregate was committed.
+
+## 26 November 2026, completion and publication checks
+
+The last batch completed at 01:25 IST on 26 November. All 120 task/designer/seed identities ran on the pinned model. The smoke pair is included once. The coordinator retained 120 full traces, 120 diagnostics and 120 energy sidecars in the ignored experiment directory. The finalized result array contains 63 execution failures. The private reviewer packet contains all 57 accepted nonempty answers, a blank five-dimension template, instructions and a provenance form. No reviewer grades or exposure attestations had been imported. Semantic accuracy and tokens per correct answer remain pending.
+
+The full aggregate has 25 silent accepted summaries under source verification and two under the format gate. The paired D/B difference was +33.3 percentage points [13.3, 53.3] and D/C was +50.0 [30.0, 70.0]. Mean matched A minus D subagent tokens was 1,284.5 [−5,205.3, 8,085.9]. D spent 9,703 more total tokens than A after counting design. There were zero spec cache hits and no quality-adjusted break-even estimate. All 120 device readings per source were unavailable.
+
+The coordinator used the following entry points. The local execution commands specified the isolated 0.40.14 endpoint and the existing verified archive cache.
+
+~~~bash
+export PYTHONPATH=src:.
+run=pilot/experiments/sweqa-ad-v2
+python3 pilot/run_sweqa.py --designers A B C D --seeds 1 2 3 --resume --ollama-host http://127.0.0.1:11448 --archive-cache /tmp/harnessspec-sweqa-targets --energy-dir "$run/energy"
+python3 -m pilot.sweqa_metrics --archive-cache /tmp/harnessspec-sweqa-targets --output pilot/tmp/v2-control/final-replay.json
+cmp pilot/tmp/v2-control/final-replay.json "$run/abcd_seed3_metrics.json"
+python3 -m pilot.prepare_sweqa_review
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+sha256sum --ignore-missing -c pilot/snapshots/sweqa-ad-seed1-v1/SHA256SUMS
+tectonic -b https://data1b.fullyjustified.net/tlextras-2022.0r0.tar --outdir pilot/tmp/v2-report docs/final_report.tex
+pdfinfo pilot/tmp/v2-report/final_report.pdf
+~~~
+
+The final replay matched the committed aggregate byte for byte. All 114 tests passed. The private and public checksum checks again matched 54 and 11 entries respectively. The final ACM PDF is three pages, with resolved references and no horizontal overflow. The review checked table layout, Git ancestry, committed paths, file sizes, candidate text, private grading IDs and credential patterns. PR #10 retains the implementation for team review. PR #9 remains open with the related-work correction requested. The public main branch still lacks genuine SWE-bench H1 results.

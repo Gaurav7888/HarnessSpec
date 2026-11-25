@@ -16,6 +16,10 @@ D/B and D/C differences are percentage points. Pair task and seed, average repea
 
 H4 uses A minus D subagent tokens on matched attempts. A nonpositive marginal saving cannot recover a positive design cost. A positive difference across attempts with unequal outcomes does not identify a reusable specification. Quality-adjusted scenarios require successful matched tasks in a compatible repository, revision and question type. Reserve the priming task and use held-out tasks for the marginal saving. Each live identity designs afresh.
 
+## Completed study
+
+All 120 attempts finished on 26 November 2026. The public checkpoints cover [A/D seed 1](../pilot/experiments/sweqa-ad-v2/ad_seed1_metrics.json), [all four conditions at seed 1](../pilot/experiments/sweqa-ad-v2/abcd_seed1_metrics.json), [seeds 1 and 2](../pilot/experiments/sweqa-ad-v2/abcd_seed2_metrics.json) and [all three seeds](../pilot/experiments/sweqa-ad-v2/abcd_seed3_metrics.json). These are cumulative snapshots. Use the last file for the complete reduced study. Fifty-seven accepted answers await independent grades. The remaining 63 attempts have finalized failure rows. [Experiment configuration](../pilot/experiments/sweqa-ad-v2/config.json) · [Serving environment](../pilot/experiments/sweqa-ad-v2/environment.json) · [Compiled report](final_report.pdf)
+
 ## Run and audit
 
 Use a separate experiment directory for a replication. The coordinator's experiment lives under `pilot/experiments/sweqa-ad-v2/`. Keep the per-attempt files, energy records, result array and reviewer materials private. The public files contain the protocol and aggregate observations. The manifest selects source snapshots by commit. The dry run verifies every reference path and range.

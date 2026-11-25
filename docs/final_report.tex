@@ -26,7 +26,10 @@ at the return gate. On a code fixture, both tuple and full-spec designs
 failed all three first-pass checks. Bounded repair made all three full
 specifications valid. In the original ten-question SWE-QA pilot, none of
 ten accepted answers contained a verifiable repository citation.
-The corrected experiment completed 80 attempts on the same ten questions. Across the completed conditions, 16 accepted summaries lacked a valid source location. Independent grades remain pending for 36 answers.
+The corrected experiment completed 120 attempts on the same ten questions.
+D returned an accepted answer without a verified citation in 15 of 30
+attempts, compared with 5 of 30 for B and 0 of 30 for C.
+All 57 accepted answers await independent grading.
 \end{abstract}
 \maketitle
 
@@ -76,7 +79,7 @@ structure. External evaluation checks whether citations match the source.
 The registered study proposes approximately 60 tasks per benchmark and at least
 three seeds per condition. Both SWE-QA treatments use the same ten
 questions at three pinned revisions. V1 paired A and D at seed 1.
-V2 completed 80 attempts at seeds 1, 2.
+V2 completed 120 attempts at seeds 1, 2 and 3.
 The pinned \artifact{qwen2.5-coder:7b} build runs in Ollama with context
 length 16,384 and temperature 0.2. All conditions receive the same read-only parent card, with execution
 ceilings of 12 actions, 8,000 generated tokens and 900 seconds.
@@ -120,12 +123,12 @@ withheld from model prompts, apart from the task and allowed source slice.
 \toprule
 Hypothesis & Result and integration source \\
 \midrule
-H1 & Pending. Gaurav: \artifact{pilot/swebench_results.json}. \\
-H2 & V2 includes matched D/B and D/C contrasts. \\
+H1 & Genuine SWE-bench Verified execution results pending. \\
+H2 & D exceeded B and C in source-verified silence per attempt by 33.3 and 50.0 percentage points, respectively. \\
 H3 & Not supported as registered. Fixture, three seeds: first-pass valid
 C 0/3, D 0/3; D 3/3 after repair. Corpus of 15 drafts: 4 valid, 11 after
 compiler repair, 15 with model repair. \artifact{pilot/h3_results_v2.json}. \\
-H4 & Zero observed spec reuses. Quality-adjusted break-even awaits successful matched tasks. \\
+H4 & D used 9,703 more tokens overall than A. No specification was reused. \\
 Energy & CPU and GPU device readings unavailable on the inference host. \\
 \bottomrule
 \end{tabularx}
@@ -165,54 +168,63 @@ uses all attempts as its denominator. A rejection or budget stop cannot
 produce a silent accepted handoff.
 
 \begin{table}[t]
-\caption{SWE-QA v2. Accepted returns and source-verified silent handoffs use the displayed denominators. Grounded counts accepted summaries with a verified citation.}
+\caption{SWE-QA v2. Accepted returns and source-verified silent handoffs use the displayed denominators. Cited counts accepted summaries with a verified file and line.}
 \centering
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrr}
 \toprule
 Arm & Acc./run & Silent/run & Silent/acc. & Cited/acc. & Cited/run \\
 \midrule
-A & 12/20 & 4/20 & 4/12 & 8/12 & 8/20 \\
-B & 7/20 & 2/20 & 2/7 & 5/7 & 5/20 \\
-C & 6/20 & 0/20 & 0/6 & 6/6 & 6/20 \\
-D & 11/20 & 10/20 & 10/11 & 1/11 & 1/20 \\
+A & 19/30 & 5/30 & 5/19 & 14/19 & 14/30 \\
+B & 13/30 & 5/30 & 5/13 & 8/13 & 8/30 \\
+C & 9/30 & 0/30 & 0/9 & 9/9 & 9/30 \\
+D & 16/30 & 15/30 & 15/16 & 1/16 & 1/30 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[t]
-\caption{SWE-QA v2 costs across all attempts. First pass measures the emitted design; rounds sums all repair rounds.}
+\caption{SWE-QA v2 costs across all attempts. First pass measures the original design. Rounds counts repairs.}
 \centering
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrr}
 \toprule
 Arm & Design & Subagent & Total & First pass & Rounds \\
 \midrule
-A & 0 & 244,668 & 244,668 & 20/20 & 0 \\
-B & 10,791 & 399,922 & 410,713 & N/A & 0 \\
-C & 8,581 & 333,978 & 342,559 & 0/20 & 0 \\
-D & 32,088 & 189,770 & 221,858 & 6/20 & 14 \\
+A & 0 & 314,775 & 314,775 & 30/30 & 0 \\
+B & 17,132 & 504,872 & 522,004 & N/A & 0 \\
+C & 12,884 & 500,620 & 513,504 & 0/30 & 0 \\
+D & 48,238 & 276,240 & 324,478 & 9/30 & 21 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{table}[t]
-\caption{V2 runtime and grading status across all attempts. Budget counts intercepted over-budget actions; preflight stops require no extra action. Wall time includes design and execution.}
+\caption{V2 runtime and grading status across all attempts. Budget counts intercepted over-budget actions. Preflight stops require no extra action. Wall time includes design and execution.}
 \centering
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrr}
 \toprule
 Arm & Budget & Denials & Hooks failed & Wall (min) & Pending \\
 \midrule
-A & 2 & 51 & 0 & 74.6 & 12 \\
-B & 3 & 62 & 0 & 135.1 & 7 \\
-C & 4 & 72 & 0 & 117 & 6 \\
-D & 1 & 121 & 0 & 75.3 & 11 \\
+A & 2 & 74 & 0 & 92.4 & 19 \\
+B & 3 & 93 & 0 & 163.9 & 13 \\
+C & 6 & 106 & 0 & 173.4 & 9 \\
+D & 1 & 194 & 0 & 107.3 & 16 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-D minus B was 40 percentage points (95\% interval [20, 60]). D minus C was 50 percentage points (95\% interval [30, 70]). Conditional on acceptance, the D differences were 62.3 points against B and 90.9 points against C. The observed differences do not support the registered reduction in silent handoffs. The primary contrasts use all matched attempts. Of 80 attempts, 44 have finalized rows and 36 accepted nonempty answers await independent scores. Human reviewers have finalized 0 answer grades. The aggregate artifact also reports citation coverage, repository-grounded return rates and intervals conditional on acceptance.
+Across all attempts, source-verified silence was higher for D than B by
+33.3 percentage points (95\% interval 13.3 to 53.3) and higher than C
+by 50.0 points (30.0 to 70.0). Each comparison pairs 30 runs across
+ten task clusters. This goes against the H2 prediction. Conditional on
+acceptance, D exceeded B by 55.3 points and C by 93.8 points.
+The format gate alone flagged two answers across all four conditions.
+Source verification identified 25 silent handoffs.
+The 63 execution failures have finalized result rows. All 57 accepted
+answers await independent grading, leaving semantic accuracy and tokens
+per correct answer pending.
 
 \subsection{H3: Validity and revision}
 All four designers share one function, \texttt{design()}. C asks for the instruction, context, tools and model and is scored as
@@ -272,13 +284,19 @@ scenario, one compatible spec is reused within a repository revision and
 question type. No finite break-even exists for nonpositive savings.
 A zero or missing design cost leaves the estimate undefined. In v1, D had no successful matched pair.
 Mean A minus D subagent cost was $-2{,}508.1$ tokens per attempt.
-In v2, mean matched A minus D subagent cost was 2,744.9 tokens per task (95\% interval [-5,507.5, 12,147.8], 10 tasks and 20 matched task--seed pairs). A positive marginal saving across all attempts can include early failures. Successful compatible pairs have yet to identify a quality-adjusted break-even. The runner designed each attempt independently and recorded zero specification cache hits.
+In v2, A minus D averaged 1,284.5 subagent tokens per matched task
+(95\% interval $-5{,}205.3$ to $8{,}085.9$). D saved 38,535 execution
+tokens across 30 matched pairs, spent 48,238 on design and used 9,703
+more tokens overall. Differences in acceptance and early stops contribute
+to this comparison. With no graded successful pairs, a quality-adjusted
+break-even is undefined. Every attempt designed afresh, with zero
+specification cache hits.
 
 \section{Energy efficiency}
 The CPU meter reads RAPL package counters. The NVIDIA meter integrates
 sampled device-wide power. The host denied access to the package counter
 and exposed neither NVIDIA power tooling nor the NVML Python module.
-All 20 v1 and 80 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
+All 20 v1 and 120 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
 
 \section{Threats to validity and limitations}
 The reduced study comprises ten purposively selected questions across
@@ -302,7 +320,7 @@ accuracy. Claims about successful reuse require an experiment that
 actually reuses a validated specification.
 
 \section{Reproducibility and AI-tool disclosure}
-\artifact{docs/SWEQA_V2.md} specifies the corrected protocol and analysis; \artifact{docs/SWEQA.md} specifies dataset, model, commands, evaluation,
+\artifact{docs/SWEQA_V2.md} specifies the corrected protocol and analysis. \artifact{docs/SWEQA.md} specifies dataset, model, commands, evaluation,
 and output provenance. \artifact{docs/SWEQA_AUDIT.md} links the frozen
 checksums, all 48 action classifications and the offline reviewer workflow. \artifact{docs/AI_USE.md} records OpenAI Codex
 implementation and verification, Claude Code for the orchestrator, compiler
