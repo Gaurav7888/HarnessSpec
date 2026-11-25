@@ -1,0 +1,14 @@
+{
+  "inference_checkout": "7660b1f8863e9f9209cf6458183d2159401ab5cc",
+  "registered_source_commit": "33c3e36003195cff97f58a33b693a17403cb52fe",
+  "ollama_distribution": "https://github.com/ollama/ollama/releases/download/v0.40.14/ollama-linux-amd64.tar.zst",
+  "ollama_distribution_sha256": "993e83d08c3d13d17c55009a3e2664c8a25445e644aec3a68bef5abb6abce67d",
+  "model_manifest_sha256": "dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+  "source_archives_sha256": {
+    "85c5d93cbd049c4bd0679c36fd1ddcae8c37b642": "30b85fcd3a54d5191e3047b4334b9a233ea753953839d732a102d0dce7d88e73",
+    "46e939b5525d9c72b677340985582b04b128478a": "ed80301ad7e96df76d29c2a74beba436e3202af1a9db6a6f4fcd1bc4a42f0c6c",
+    "5989efe3efec31a9d14f550d89903b6311dfc828": "0931ca35a537097532ee63e3834a7c9cc7e00472f836178979cd8a80ff5050d6"
+  },
+  "server_version": "0.40.14",
+  "size_vram_bytes": 0
+}
