@@ -12,12 +12,13 @@ from pathlib import Path
 import random
 from statistics import mean
 
+from harnessspec.execution import NotExecutable, executable_spec
 from harnessspec.llm import load_pin
 from harnessspec.results import check_output_path, read_results, result_key, write_json
-from harnessspec.sweqa import load_manifest
+from harnessspec.sweqa import load_manifest, read_only_card
 from pilot.metrics import BOOTSTRAP_SEED, RESAMPLES, amortization, matched_pairs, paired_bootstrap
 from pilot.run_sweqa import (EXPERIMENT, HISTORICAL_PROTOCOL, PROTOCOL, check_evidence,
-                             load_artifact, prepare_sources, source_verified_silent)
+                             load_artifact, prepare_sources, source_verified_silent, task_prompt)
 
 
 def ratio(value, denominator):
@@ -111,6 +112,34 @@ def analyze_attempts(runs, diagnostics):
     }
 
 
+def verify_adapter(record, instance):
+    card = read_only_card()
+    if record["parent_card"] != card.to_dict():
+        raise ValueError("parent capability card changed")
+    error = None
+    try:
+        spec = executable_spec(record["design"], task_prompt(instance), card)
+    except NotExecutable as exc:
+        spec = None
+        error = {"reason": exc.reason, "detail": exc.detail}
+    row, detail = record["row"], record["diagnostics"]
+    if spec != record["executable_spec"] or error != detail["not_executable"]:
+        raise ValueError("saved adapter decision differs from replay")
+    if (spec is None) != (record["runtime_trace"] is None):
+        raise ValueError("runtime execution disagrees with adapter decision")
+    if spec is None and (row["resolved"] is not False or row["subagent_tokens"]):
+        raise ValueError("rejected design has an execution or success")
+    if detail["compiled_validity_applicable"] != (record["designer"] != "B"):
+        raise ValueError("incorrect validity applicability")
+    if row["first_pass_valid"] != bool(record["design"]["first_pass_valid"]):
+        raise ValueError("incorrect as-emitted validity")
+    if row["rounds"] != record["design"]["rounds"] or row["design_tokens"] != record["design"]["design_tokens"]:
+        raise ValueError("design repair or token ledger mismatch")
+    charged = sum(c["charged_tokens"] for c in record["transcript"] if c["stage"] == "subagent")
+    if charged != (record["runtime_trace"] or {}).get("tokens_used", 0):
+        raise ValueError("runtime charged-token ledger mismatch")
+
+
 def audit(trace_dir, result_path, energy_dir, instances, workspaces, protocol):
     results = {result_key(r): r for r in read_results([result_path])}
     manifest = {i["question_id"]: i for i in instances}
@@ -125,6 +154,8 @@ def audit(trace_dir, result_path, energy_dir, instances, workspaces, protocol):
         record = load_artifact(path, key, instance, pin, grade_only=True)
         if record["protocol"] != protocol:
             raise ValueError(f"{path}: incompatible treatment")
+        if protocol == PROTOCOL:
+            verify_adapter(record, instance)
         row = record["row"]
         detail = record["diagnostics"]
         answer = record["answer"]
