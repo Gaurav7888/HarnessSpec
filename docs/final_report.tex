@@ -26,7 +26,7 @@ at the return gate. On a code fixture, both tuple and full-spec designs
 failed all three first-pass checks. Bounded repair made all three full
 specifications valid. In the original ten-question SWE-QA pilot, none of
 ten accepted answers contained a verifiable repository citation.
-The corrected experiment completed 20 attempts on the same ten questions. Across the completed conditions, 7 accepted summaries lacked a valid source location. Independent grades remain pending for 11 answers.
+The corrected experiment completed 40 attempts on the same ten questions. Across the completed conditions, 7 accepted summaries lacked a valid source location. Independent grades remain pending for 17 answers.
 \end{abstract}
 \maketitle
 
@@ -76,7 +76,7 @@ structure. External evaluation checks whether citations match the source.
 The registered study proposes approximately 60 tasks per benchmark and at least
 three seeds per condition. Both SWE-QA treatments use the same ten
 questions at three pinned revisions. V1 paired A and D at seed 1.
-V2 completed 20 attempts at seeds 1.
+V2 completed 40 attempts at seeds 1.
 The pinned \artifact{qwen2.5-coder:7b} build runs in Ollama with context
 length 16,384 and temperature 0.2. All conditions receive the same read-only parent card, with execution
 ceilings of 12 actions, 8,000 generated tokens and 900 seconds.
@@ -121,7 +121,7 @@ withheld from model prompts, apart from the task and allowed source slice.
 Hypothesis & Result and integration source \\
 \midrule
 H1 & Pending. Gaurav: \artifact{pilot/swebench_results.json}. \\
-H2 & The seed-1 A/D pilot precedes the registered D/B and D/C contrasts. \\
+H2 & V2 includes matched D/B and D/C contrasts. \\
 H3 & Not supported as registered. Fixture, three seeds: first-pass valid
 C 0/3, D 0/3; D 3/3 after repair. Corpus of 15 drafts: 4 valid, 11 after
 compiler repair, 15 with model repair. \artifact{pilot/h3_results_v2.json}. \\
@@ -172,6 +172,8 @@ produce a silent accepted handoff.
 Arm & Accepted & Silent/attempt & Silent/accept & Grounded \\
 \midrule
 A & 5/10 & 2/10 & 2/5 & 3 \\
+B & 3/10 & 0/10 & 0/3 & 3 \\
+C & 3/10 & 0/10 & 0/3 & 3 \\
 D & 6/10 & 5/10 & 5/6 & 1 \\
 \bottomrule
 \end{tabular}
@@ -185,12 +187,14 @@ D & 6/10 & 5/10 & 5/6 & 1 \\
 Arm & Design & Subagent & Total & First pass & Rounds \\
 \midrule
 A & 0 & 133,951 & 133,951 & 10/10 & 0 \\
+B & 4,836 & 148,153 & 152,989 & N/A & 0 \\
+C & 4,285 & 163,528 & 167,813 & 0/10 & 0 \\
 D & 16,034 & 112,738 & 128,772 & 3/10 & 7 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The registered D/B and D/C comparisons await matched attempts. The primary contrasts use all matched attempts. Of 20 attempts, 9 have finalized rows and 11 accepted nonempty answers await independent scores. Human reviewers have finalized 0 answer grades. The aggregate artifact also reports citation coverage, repository-grounded return rates and intervals conditional on acceptance.
+D minus B was 50 percentage points (95\% interval [20, 80]). D minus C was 50 percentage points (95\% interval [20, 80]). The observed differences do not support the registered reduction in silent handoffs. The primary contrasts use all matched attempts. Of 40 attempts, 23 have finalized rows and 17 accepted nonempty answers await independent scores. Human reviewers have finalized 0 answer grades. The aggregate artifact also reports citation coverage, repository-grounded return rates and intervals conditional on acceptance.
 
 \subsection{H3: Validity and revision}
 All four designers share one function, \texttt{design()}. C asks for the instruction, context, tools and model and is scored as
@@ -256,7 +260,7 @@ In v2, mean matched A minus D subagent cost was 2,121.3 tokens per task (95\% in
 The CPU meter reads RAPL package counters. The NVIDIA meter integrates
 sampled device-wide power. The host denied access to the package counter
 and exposed neither NVIDIA power tooling nor the NVML Python module.
-All 20 v1 and 20 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
+All 20 v1 and 40 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
 
 \section{Threats to validity and limitations}
 The reduced study comprises ten purposively selected questions across
