@@ -158,7 +158,8 @@ def check_evidence(instance: dict, answer: dict | None, workspace: Path) -> dict
         if not 1 <= line <= len(target.read_bytes().splitlines()):
             continue
         usable += 1
-        name = target.relative_to(workspace).as_posix()
+        # resolve_inside returns a resolved path; on macOS /var is a symlink to /private/var.
+        name = target.relative_to(workspace.resolve()).as_posix()
         if name in instance["gold_files"]:
             matches.add(name)
         if any(entry["file"] == name and entry["start"] <= line <= entry["end"]
