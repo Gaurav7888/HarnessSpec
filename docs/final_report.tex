@@ -26,7 +26,7 @@ at the return gate. On a code fixture, both tuple and full-spec designs
 failed all three first-pass checks. Bounded repair made all three full
 specifications valid. In the original ten-question SWE-QA pilot, none of
 ten accepted answers contained a verifiable repository citation.
-The corrected experiment completed 40 attempts on the same ten questions. Across the completed conditions, 7 accepted summaries lacked a valid source location. Independent grades remain pending for 17 answers.
+The corrected experiment completed 80 attempts on the same ten questions. Across the completed conditions, 16 accepted summaries lacked a valid source location. Independent grades remain pending for 36 answers.
 \end{abstract}
 \maketitle
 
@@ -76,7 +76,7 @@ structure. External evaluation checks whether citations match the source.
 The registered study proposes approximately 60 tasks per benchmark and at least
 three seeds per condition. Both SWE-QA treatments use the same ten
 questions at three pinned revisions. V1 paired A and D at seed 1.
-V2 completed 40 attempts at seeds 1.
+V2 completed 80 attempts at seeds 1, 2.
 The pinned \artifact{qwen2.5-coder:7b} build runs in Ollama with context
 length 16,384 and temperature 0.2. All conditions receive the same read-only parent card, with execution
 ceilings of 12 actions, 8,000 generated tokens and 900 seconds.
@@ -167,14 +167,15 @@ produce a silent accepted handoff.
 \begin{table}[t]
 \caption{SWE-QA v2. Accepted returns and source-verified silent handoffs use the displayed denominators. Grounded counts accepted summaries with a verified citation.}
 \centering
-\begin{tabular}{lrrrr}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}
 \toprule
-Arm & Accepted & Silent/attempt & Silent/accept & Grounded \\
+Arm & Acc./run & Silent/run & Silent/acc. & Cited/acc. & Cited/run \\
 \midrule
-A & 5/10 & 2/10 & 2/5 & 3 \\
-B & 3/10 & 0/10 & 0/3 & 3 \\
-C & 3/10 & 0/10 & 0/3 & 3 \\
-D & 6/10 & 5/10 & 5/6 & 1 \\
+A & 12/20 & 4/20 & 4/12 & 8/12 & 8/20 \\
+B & 7/20 & 2/20 & 2/7 & 5/7 & 5/20 \\
+C & 6/20 & 0/20 & 0/6 & 6/6 & 6/20 \\
+D & 11/20 & 10/20 & 10/11 & 1/11 & 1/20 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -182,19 +183,36 @@ D & 6/10 & 5/10 & 5/6 & 1 \\
 \begin{table}[t]
 \caption{SWE-QA v2 costs across all attempts. First pass measures the emitted design; rounds sums all repair rounds.}
 \centering
+\setlength{\tabcolsep}{3pt}
 \begin{tabular}{lrrrrr}
 \toprule
 Arm & Design & Subagent & Total & First pass & Rounds \\
 \midrule
-A & 0 & 133,951 & 133,951 & 10/10 & 0 \\
-B & 4,836 & 148,153 & 152,989 & N/A & 0 \\
-C & 4,285 & 163,528 & 167,813 & 0/10 & 0 \\
-D & 16,034 & 112,738 & 128,772 & 3/10 & 7 \\
+A & 0 & 244,668 & 244,668 & 20/20 & 0 \\
+B & 10,791 & 399,922 & 410,713 & N/A & 0 \\
+C & 8,581 & 333,978 & 342,559 & 0/20 & 0 \\
+D & 32,088 & 189,770 & 221,858 & 6/20 & 14 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-D minus B was 50 percentage points (95\% interval [20, 80]). D minus C was 50 percentage points (95\% interval [20, 80]). The observed differences do not support the registered reduction in silent handoffs. The primary contrasts use all matched attempts. Of 40 attempts, 23 have finalized rows and 17 accepted nonempty answers await independent scores. Human reviewers have finalized 0 answer grades. The aggregate artifact also reports citation coverage, repository-grounded return rates and intervals conditional on acceptance.
+\begin{table}[t]
+\caption{V2 runtime and grading status across all attempts. Budget counts intercepted over-budget actions; preflight stops require no extra action. Wall time includes design and execution.}
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Arm & Budget & Denials & Hooks failed & Wall (min) & Pending \\
+\midrule
+A & 2 & 51 & 0 & 74.6 & 12 \\
+B & 3 & 62 & 0 & 135.1 & 7 \\
+C & 4 & 72 & 0 & 117 & 6 \\
+D & 1 & 121 & 0 & 75.3 & 11 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+D minus B was 40 percentage points (95\% interval [20, 60]). D minus C was 50 percentage points (95\% interval [30, 70]). Conditional on acceptance, the D differences were 62.3 points against B and 90.9 points against C. The observed differences do not support the registered reduction in silent handoffs. The primary contrasts use all matched attempts. Of 80 attempts, 44 have finalized rows and 36 accepted nonempty answers await independent scores. Human reviewers have finalized 0 answer grades. The aggregate artifact also reports citation coverage, repository-grounded return rates and intervals conditional on acceptance.
 
 \subsection{H3: Validity and revision}
 All four designers share one function, \texttt{design()}. C asks for the instruction, context, tools and model and is scored as
@@ -254,13 +272,13 @@ scenario, one compatible spec is reused within a repository revision and
 question type. No finite break-even exists for nonpositive savings.
 A zero or missing design cost leaves the estimate undefined. In v1, D had no successful matched pair.
 Mean A minus D subagent cost was $-2{,}508.1$ tokens per attempt.
-In v2, mean matched A minus D subagent cost was 2,121.3 tokens per task (95\% interval [-9,448, 13,601.3], 10 tasks and 10 matched task--seed pairs). A positive marginal saving across all attempts can include early failures. Successful compatible pairs have yet to identify a quality-adjusted break-even. The runner designed each attempt independently and recorded zero specification cache hits.
+In v2, mean matched A minus D subagent cost was 2,744.9 tokens per task (95\% interval [-5,507.5, 12,147.8], 10 tasks and 20 matched task--seed pairs). A positive marginal saving across all attempts can include early failures. Successful compatible pairs have yet to identify a quality-adjusted break-even. The runner designed each attempt independently and recorded zero specification cache hits.
 
 \section{Energy efficiency}
 The CPU meter reads RAPL package counters. The NVIDIA meter integrates
 sampled device-wide power. The host denied access to the package counter
 and exposed neither NVIDIA power tooling nor the NVML Python module.
-All 20 v1 and 40 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
+All 20 v1 and 80 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
 
 \section{Threats to validity and limitations}
 The reduced study comprises ten purposively selected questions across
