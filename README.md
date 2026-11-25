@@ -40,6 +40,7 @@ result["spec"], result["design_tokens"], result["rounds"], result["first_pass_va
 - `design_tokens` is prompt plus output tokens over all of the designer's model calls. It is 0 for A.
 - The result also carries `valid`, `remaining_errors`, `missing_acceptance_test`, `model`, `model_digest`, `wall_clock_s`, and `log` (every reply).
 - For D, check `result["valid"]` before running the spec. A spec that is still invalid after three rounds is a logged orchestrator failure, not something to run.
+- To run any designer, call `harnessspec.execution.executable_spec(result, task, card)`. It returns the spec to pass to `Session`, or raises `NotExecutable` with a `reason` to record. A and D run their own spec only when valid. B runs A's harness with the brief as the goal. C runs A's harness with the tuple's instruction, context and tools, permissions from the card, and paths narrowed to each tool's grant.
 - The orchestrator and every subagent call the model through `harnessspec.llm.OllamaClient`. `harnessspec.cursor_cli` is kept only for the historical Grok rows and is not used for results.
 - H3 v2 is `pilot/h3_results_v2.json` and `pilot/h3_transcripts_v2.json`. It was run with the current allowlist, which includes `pytest`, and with command reduction. v1, `pilot/h3_results.json`, predates both. It is frozen in the SWE-QA snapshot manifest and kept unchanged.
 
