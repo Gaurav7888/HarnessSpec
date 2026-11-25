@@ -41,7 +41,11 @@ AOrchestra represents the instruction, context, tools and model of a subagent as
 a tuple~\cite{aorchestra}. Automated Design of Agentic Systems searches agent
 designs offline~\cite{adas}. Oskooei et al. compare retrieval and delegated
 search for repository question answering and examine handoff breakdowns on
-SWE-QA~\cite{oskooei}. HarnessSpec evaluates per-task design under explicit
+SWE-QA~\cite{oskooei}. The Conductor trains a 7B model with reinforcement
+learning to write natural-language instructions and communication topologies
+for a pool of worker models~\cite{conductor}. Its designs are not checked
+before workers run, which corresponds to our free-text condition B.
+HarnessSpec evaluates per-task design under explicit
 privilege, budget, and return-evidence constraints.
 
 \section{HarnessSpec protocol}
@@ -54,8 +58,13 @@ and receives bounded validation and repair.
 
 \section{Validator and runtime}
 The validator checks structure, path and privilege bounds, feasible budgets,
-model tier, and named verification commands. The designer receives typed errors
-and can revise a rejected draft for up to three rounds. In the live loop, each
+model tier, and named verification commands. Repair is deterministic. It
+clamps privileges and budgets, removes unknown fields, supplies default stop
+rules, hooks and return contracts, and reduces an allowlisted command written
+with arguments (\texttt{pytest tests/x.py::t}) to its name, because the task,
+not the spec, selects which tests run. It never writes a goal, an acceptance
+test or a context slice. Typed errors that remain are returned to the
+designer with the values the parent card allows, for up to three rounds. In the live loop, each
 model reply becomes one action, and \texttt{Session.step} applies budget checks,
 tool grants and the return gate. For SWE-QA, tool access is read-only and
 hooks that execute repository code are denied. The gate checks evidence
@@ -106,8 +115,9 @@ H1 & Pending. Gaurav: \artifact{pilot/swebench_results.json}. \\
 H2 & A/D pilot recorded zero silent handoffs in both conditions. D/B and
 D/C pending. \artifact{pilot/sweqa_results.json} and
 \artifact{pilot/metrics_results.json}. \\
-H3 & Fixture design pilot. C: 0/3 valid as emitted. D: 1/3 first-pass valid,
-3/3 after repair. Affan: \artifact{pilot/h3_results.json}. \\
+H3 & Not supported as registered. Fixture, three seeds: first-pass valid
+C 0/3, D 0/3; D 3/3 after repair. Corpus of 15 drafts: 4 valid, 11 after
+compiler repair, 15 with model repair. \artifact{pilot/h3_results_v2.json}. \\
 H4 & No successful matched pairs or observed cache reuse. Marginal D subagent cost exceeded A.
 \artifact{pilot/metrics_results.json}. \\
 Energy & Unavailable on development host. Source:
@@ -164,13 +174,55 @@ Tokens per correct & Pending & N/A \\
 \end{table}
 
 \subsection{H3: Validity and revision}
-\textbf{Affan integration.} The committed model-generated fixture design
-pilot and the scripted corpus use different inputs. The fixture numbers in
-Table~\ref{tab:results} come from the existing H3 artifact. C omits required
-full-spec fields by construction. In the separate 15-spec corpus, 4 were
-initially valid, 11 passed compiler-only repair, and 14 passed with model
-repair. Add the complete error and cost breakdown from
-\artifact{docs/sections/h3_draft.md}. The tier comparison remains unmeasured.
+All four designers share one function, \texttt{design(task, card, designer,
+seed)}. C asks for the instruction, context, tools and model and is scored as
+emitted. D asks for a full HarnessSpec. Its prompt contains the task, the
+parent card, the JSON Schema and the compiler's rules, but no filled-in spec,
+because the model copied such an example almost verbatim in a smoke test.
+Decoding enforces JSON syntax only, so structural errors remain the model's.
+
+\begin{table}[t]
+\caption{H3 on \artifact{fixtures/off_by_one}, seeds 1--3
+(\artifact{pilot/h3_results_v2.json}).}
+\label{tab:h3}
+\centering
+\begin{tabular}{lcccc}
+\toprule
+Designer & First pass & Final & Calls & Design tokens \\
+\midrule
+C & 0/3 & 0/3 & 1 & 402 \\
+D & 0/3 & 3/3 & 1 & 1,602 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+H3 as registered is not supported: first-pass validity does not rise from C
+to D (Table~\ref{tab:h3}). Every first D reply wrote its acceptance test and
+hook as \texttt{pytest tests/test\_app.py::\ldots}, and two of three filled
+the model digest with a placeholder. The compiler cleared both in one round
+without a second model call. Each C reply lacked the fields the tuple does not
+carry and a model tier, and two of three gave a tool a path outside its grant.
+
+The 15 hand-written corpus specs were also given to D's repair loop as first
+drafts. Four were valid as written. The compiler alone made 11 valid. With the
+model answering the remaining typed errors, all 15 became valid within two
+rounds for 7,268 design tokens. The four the model added are exactly those the
+compiler may not fix: a missing acceptance test, a context path that left the
+workspace, an empty goal, and the four-field tuple. No D design ended with a
+missing acceptance test.
+
+The supported claim is therefore narrower. Typed validation with bounded
+repair turns D's invalid first replies into valid specs, at about four times
+C's design cost, but it does not make the orchestrator's first reply valid. On
+the fixture end to end (\artifact{pilot/subagent_fixture_pinned.json}), A and
+D both resolved; D spent 1,603 design and 1,770 subagent tokens against A's
+1,239 subagent tokens. Three seeds on one task are a pilot. C cannot be
+valid under this validator by construction. Two prompt and compiler changes
+followed inspection of earlier output and preceded this run: error hints with
+an unchanged-reply stop, and command reduction, which followed the same
+selector failure in v1 (\artifact{pilot/h3_results.json}, before
+\texttt{pytest} joined the allowlist) and in six SWE-QA designs. Nothing was
+tuned on these results. With one model, the tier part of H3 is untested.
 
 \subsection{H4: Design-cost amortization}
 For correct matched A/D pairs, estimate the token difference in subagent
@@ -224,7 +276,9 @@ benchmark runs.
 \artifact{docs/SWEQA.md} specifies dataset, model, commands, evaluation,
 and output provenance. \artifact{docs/SWEQA_AUDIT.md} links the frozen
 checksums, all 48 action classifications and the offline reviewer workflow. \artifact{docs/AI_USE.md} records OpenAI Codex
-implementation and verification alongside earlier team tool use. Ollama
+implementation and verification, Claude Code for the orchestrator, compiler
+repair and H3 work, and earlier team tool use, with each prompt change made
+after inspecting output. Ollama
 supplies the pinned experimental model. Scripted fixtures, mocked tests,
 and genuine benchmark executions are tracked independently.
 
@@ -239,6 +293,10 @@ Automated Design of Agentic Systems. 2024.
 Amirkia Rafiei Oskooei et al. 2026.
 Deep Agentic Search for Repository-Level Code Question Answering:
 An Empirical Study. \url{https://arxiv.org/abs/2608.01507}.
+\bibitem{conductor}
+Stefan Nielsen, Edoardo Cetin, Peter Schwendeman, Qi Sun, Jinglue Xu, and
+Yujin Tang. 2026. Learning to Orchestrate Agents in Natural Language with the
+Conductor. In \emph{ICLR}. \url{https://arxiv.org/abs/2512.04388}.
 \bibitem{peng}
 Weihan Peng et al. 2026. SWE-QA: Can Language Models Answer
 Repository-level Code Questions? In \emph{Findings of ACL}, 8230--8245.

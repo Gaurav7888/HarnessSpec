@@ -152,3 +152,14 @@ OpenAI Codex audited Dinesh's local work at the user's request. The prompt asked
   - **A and D:** run only when valid.
   - C's H3 score is unchanged.
 - Check: `tests/test_execution.py` covers each rule and runs B and C specs end to end on the fixture with a scripted model. Offline, the six fixture B and C designs in `pilot/h3_transcripts_v2.json` were all executable under these rules. No model was called.
+
+## 2026-11-25 (report: H3 section)
+
+- Tool: Claude Code (Claude Opus 5.5).
+- Task: Affan's parts of `docs/final_report.tex`:
+  - the H3 row in Table 1, now H3 v2
+  - the H3 subsection, with Table 3 from `pilot/h3_results_v2.json`
+  - one sentence in Related work and a bibliography entry for the Conductor (arXiv:2512.04388, ICLR 2026, checked on arXiv)
+  - the repair rules in Validator and runtime
+  - the Claude Code line in the AI-tool disclosure
+- Check: compiled with `tectonic --outdir <tmp> docs/final_report.tex`: 3 pages, no undefined references, font warnings only. Every number in the H3 text was read from `pilot/h3_results_v2.json` or `pilot/subagent_fixture_pinned.json`.
