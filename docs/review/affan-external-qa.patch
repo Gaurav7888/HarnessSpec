@@ -1,0 +1,40 @@
+--- a/src/harnessspec/orchestrator.py
++++ b/src/harnessspec/orchestrator.py
+@@ -65,6 +65,19 @@
+     )
+
+
++def _design_role(task: dict) -> str:
++    if task.get("assessment") != "external_qa":
++        return SYSTEM_D
++    return (
++        "Design a HarnessSpec for read-only repository question answering. "
++        "Return exactly one object following the supplied schema. "
++        "The parent permits source exploration, and a reviewer assesses the answer after return. "
++        "Do not invent source paths, named tests, test selectors, or test output. "
++        "Command fields accept a single allowlisted identifier without arguments. "
++        "Include only checks you can justify. Repository test execution is unavailable."
++    )
++
++
+ def _task_block(task: dict, card: CapabilityCard) -> str:
+     return (
+         f"Task id: {task['task_id']}\n"
+@@ -88,7 +101,7 @@
+         f"{_rules(card, model_name)}\n\n"
+         f'Use task_id "{task["task_id"]}". Reply with the HarnessSpec only.'
+     )
+-    return [{"role": "system", "content": SYSTEM_D}, {"role": "user", "content": user}]
++    return [{"role": "system", "content": _design_role(task)}, {"role": "user", "content": user}]
+
+
+ def hint(error: SpecError, card: CapabilityCard, previous) -> str | None:
+@@ -140,7 +153,7 @@
+         f"The compiler still reports these typed errors:\n{listed}\n\n"
+         "Return the full corrected HarnessSpec as one JSON object. Fix every error listed."
+     )
+-    return [{"role": "system", "content": SYSTEM_D}, {"role": "user", "content": user}]
++    return [{"role": "system", "content": _design_role(task)}, {"role": "user", "content": user}]
+
+
+ SYSTEM_C = (

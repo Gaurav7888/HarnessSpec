@@ -51,7 +51,7 @@ def read_results(paths: list[Path]) -> list[dict]:
     """Read arrays of rows and reject duplicate run identities across files."""
     rows = {}
     for path in paths:
-        records = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=_unique_fields)
+        records = json.loads(path.read_text(encoding="utf-8"), object_pairs_hook=unique_fields)
         if not isinstance(records, list):
             raise ValueError(f"{path}: expected an array of result objects")
         for index, row in enumerate(records):
@@ -66,7 +66,7 @@ def read_results(paths: list[Path]) -> list[dict]:
     return [rows[key] for key in sorted(rows)]
 
 
-def _unique_fields(pairs: list[tuple[str, object]]) -> dict:
+def unique_fields(pairs: list[tuple[str, object]]) -> dict:
     result = {}
     for field, value in pairs:
         if field in result:
@@ -88,3 +88,19 @@ def write_json(path: Path, value: object) -> None:
             os.replace(temporary, path)
         finally:
             temporary.unlink(missing_ok=True)
+
+
+def check_output_path(path: Path) -> None:
+    """Protect the registered pilot artifacts from execution and analysis writes."""
+    pilot = SCHEMA_PATH.parent
+    snapshot = pilot / "snapshots/sweqa-ad-seed1-v1"
+    target = path.resolve()
+    if any(target.is_relative_to(directory) for directory in (
+        snapshot, pilot / "traces/sweqa", pilot / "traces/sweqa-energy",
+    )):
+        raise ValueError(f"frozen pilot path: {path}")
+    manifest = snapshot / "SHA256SUMS"
+    protected = {pilot.parent / line.split("  ", 1)[1] for line in manifest.read_text().splitlines()}
+    protected.add(pilot / "tmp/sweqa_grading_packet.json")
+    if target in protected:
+        raise ValueError(f"frozen pilot path: {path}")
