@@ -1,4 +1,9 @@
-"""Write pilot/h3_results.json and pilot/h3_transcripts.json with the pinned model.
+"""Write pilot/h3_results_v2.json and pilot/h3_transcripts_v2.json with the pinned model.
+
+v1 (pilot/h3_results.json) was generated before pytest joined the allowlist and
+before the compiler reduced commands with arguments. It is frozen in the SWE-QA
+snapshot manifest and kept unchanged. v2 is the H3 result for the design() that
+the benchmark runs use.
 
 Needs Ollama running with the model in pilot/model.json pulled. The client
 refuses to start if the local digest differs from the pin.
@@ -16,6 +21,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from harnessspec.h3 import SEEDS, corpus_rows, fixture_rows, summarize
 from harnessspec.llm import OllamaClient, load_pin
+from harnessspec.parent import ALLOWED_COMMANDS
 
 
 def main() -> None:
@@ -27,6 +33,9 @@ def main() -> None:
     transcripts += more_transcripts
     payload = {
         "hypothesis": "H3: first-pass validity rises from C to D",
+        "version": "v2",
+        "allowed_commands": sorted(ALLOWED_COMMANDS),
+        "compiler_reduces_command_arguments": True,
         "date": date.today().isoformat(),
         "model": pin["name"],
         "model_digest": pin["digest"],
@@ -36,9 +45,9 @@ def main() -> None:
         "summary": summarize(rows),
         "rows": rows,
     }
-    out = ROOT / "pilot" / "h3_results.json"
+    out = ROOT / "pilot" / "h3_results_v2.json"
     out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    (ROOT / "pilot" / "h3_transcripts.json").write_text(
+    (ROOT / "pilot" / "h3_transcripts_v2.json").write_text(
         json.dumps(transcripts, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(payload["summary"], indent=2))
     print(f"wrote {out}")
