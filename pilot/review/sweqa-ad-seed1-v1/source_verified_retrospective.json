@@ -1,0 +1,184 @@
+{
+  "analysis": "source_verified_retrospective",
+  "designers": {
+    "A": {
+      "acceptance_rate": 1.0,
+      "accepted": 10,
+      "accuracy_all_attempts": null,
+      "accuracy_graded_answers": null,
+      "attempted": 10,
+      "attempts_by_seed": {
+        "1": 10
+      },
+      "budget_violations": 0,
+      "correct_finalized": 0,
+      "design_tokens": 0,
+      "failed_without_gradable_answer": 0,
+      "finalized_rows": 0,
+      "first_pass_validity": 1,
+      "format_silent": 0,
+      "graded_answers": 0,
+      "grounded_returns": 0,
+      "hook_failures": 0,
+      "pending_grades": 10,
+      "repository_grounded_per_attempt": 0.0,
+      "rounds": 0,
+      "silent_per_accepted": 1.0,
+      "silent_per_attempt": 1.0,
+      "subagent_tokens": 6026,
+      "tokens_per_correct": null,
+      "tool_denials": 0,
+      "total_tokens": 6026,
+      "usable_citations_in_accepted_answers": 0,
+      "verified_citation_coverage_per_accepted": 0.0,
+      "verified_silent": 10,
+      "wall_clock_s": 254.653
+    },
+    "D": {
+      "acceptance_rate": 0.0,
+      "accepted": 0,
+      "accuracy_all_attempts": 0.0,
+      "accuracy_graded_answers": null,
+      "attempted": 10,
+      "attempts_by_seed": {
+        "1": 10
+      },
+      "budget_violations": 4,
+      "correct_finalized": 0,
+      "design_tokens": 31839,
+      "failed_without_gradable_answer": 10,
+      "finalized_rows": 10,
+      "first_pass_validity": 0.4,
+      "format_silent": 0,
+      "graded_answers": 0,
+      "grounded_returns": 0,
+      "hook_failures": 0,
+      "pending_grades": 0,
+      "repository_grounded_per_attempt": 0.0,
+      "rounds": 8,
+      "silent_per_accepted": null,
+      "silent_per_attempt": 0.0,
+      "subagent_tokens": 31107,
+      "tokens_per_correct": null,
+      "tool_denials": 48,
+      "total_tokens": 62946,
+      "usable_citations_in_accepted_answers": 0,
+      "verified_citation_coverage_per_accepted": null,
+      "verified_silent": 0,
+      "wall_clock_s": 1455.066
+    }
+  },
+  "energy": {
+    "cpu": {
+      "coverage": 0,
+      "joules": null,
+      "statuses": {
+        "unavailable": 20
+      }
+    },
+    "gpu": {
+      "coverage": 0,
+      "joules": null,
+      "statuses": {
+        "unavailable": 20
+      }
+    }
+  },
+  "h2": {},
+  "h4": {
+    "attempt_cost_status": "no_finite_break_even",
+    "conditional_reuse_scenarios": [],
+    "matched_correct_pairs": 0,
+    "observed_A_minus_D_subagent_tokens": {
+      "bootstrap_seed": 20261124,
+      "ci95": [
+        -4870.5,
+        -161.7
+      ],
+      "difference": -2508.1,
+      "excluded_left": 0,
+      "excluded_right": 0,
+      "matched_observations": 10,
+      "matched_seeds": [
+        1
+      ],
+      "matched_seeds_by_task": [
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:1"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:17"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:35"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:43"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:18"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:24"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:34"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:44"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "requests:30"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "requests:48"
+        }
+      ],
+      "matched_tasks": 10,
+      "resamples": 10000
+    },
+    "observed_spec_cache_hits": 0,
+    "quality_adjusted_status": "undefined"
+  },
+  "protocol": "sweqa-ad-v1"
+}

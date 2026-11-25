@@ -342,6 +342,9 @@ def run_locked(args, plan: list[tuple], pin: dict, stack: ExitStack) -> None:
     finalized = {result_key(row): row for row in existing}
     grades = load_grades(args.grades)
     selected = {key: instance for key, instance in plan}
+    planned_paths = {artifact_path(args.trace_dir, key) for key in selected}
+    if set(args.trace_dir.glob("*.json")) - planned_paths or finalized.keys() - selected.keys():
+        raise ValueError("resume with a cumulative selection to preserve the complete result and grading packet")
     saved = {}
     for key, instance in plan:
         path = artifact_path(args.trace_dir, key)
