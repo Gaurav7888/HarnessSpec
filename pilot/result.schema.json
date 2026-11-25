@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HarnessSpec benchmark run",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "benchmark",
+    "designer",
+    "seed",
+    "model",
+    "model_digest",
+    "design_tokens",
+    "subagent_tokens",
+    "rounds",
+    "first_pass_valid",
+    "resolved",
+    "silent_handoff",
+    "budget_violations",
+    "tool_denials",
+    "hook_failures",
+    "wall_clock_s"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "benchmark": {
+      "enum": [
+        "swebench",
+        "sweqa"
+      ]
+    },
+    "designer": {
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ]
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1
+    },
+    "model_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "design_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "subagent_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rounds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3
+    },
+    "first_pass_valid": {
+      "type": "boolean"
+    },
+    "resolved": {
+      "type": "boolean"
+    },
+    "silent_handoff": {
+      "type": "boolean"
+    },
+    "budget_violations": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tool_denials": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "hook_failures": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "wall_clock_s": {
+      "type": "number",
+      "minimum": 0
+    }
+  }
+}
