@@ -65,6 +65,33 @@ def _rules(card: CapabilityCard, model_name: str) -> str:
     )
 
 
+SYSTEM_D_QA = (
+    "Design a HarnessSpec for read-only repository question answering. "
+    "Return exactly one object following the supplied schema. "
+    "The parent permits source exploration, and a reviewer assesses the answer after return. "
+    "Do not invent source paths, named tests, test selectors, or test output. "
+    "Command fields accept a single allowlisted identifier without arguments. "
+    "Include only checks you can justify. Repository test execution is unavailable. "
+    # Feasibility, not a design choice: no test runs here, so a contract that
+    # demands test output can never be met and every return would be rejected.
+    "No test output can exist, so set return_contract.require_test_output to false. "
+    # Same reason: the SWE-QA runner denies every test hook, so a test hook
+    # fails and the return is rejected regardless of the answer.
+    "Test hooks would execute repository code, which is denied, so use no hook of kind test."
+)
+
+
+def _design_role(task: dict) -> str:
+    """D's system message. Coding tasks keep SYSTEM_D unchanged.
+
+    A task with ``assessment == "external_qa"`` (the SWE-QA runner) gets the
+    read-only QA message for its first design call and for every repair call.
+    """
+    if task.get("assessment") != "external_qa":
+        return SYSTEM_D
+    return SYSTEM_D_QA
+
+
 def _task_block(task: dict, card: CapabilityCard) -> str:
     return (
         f"Task id: {task['task_id']}\n"
@@ -88,7 +115,7 @@ def spec_messages(task: dict, card: CapabilityCard, model_name: str) -> list[dic
         f"{_rules(card, model_name)}\n\n"
         f'Use task_id "{task["task_id"]}". Reply with the HarnessSpec only.'
     )
-    return [{"role": "system", "content": SYSTEM_D}, {"role": "user", "content": user}]
+    return [{"role": "system", "content": _design_role(task)}, {"role": "user", "content": user}]
 
 
 def hint(error: SpecError, card: CapabilityCard, previous) -> str | None:
@@ -140,7 +167,7 @@ def repair_messages(task: dict, card: CapabilityCard, model_name: str, previous,
         f"The compiler still reports these typed errors:\n{listed}\n\n"
         "Return the full corrected HarnessSpec as one JSON object. Fix every error listed."
     )
-    return [{"role": "system", "content": SYSTEM_D}, {"role": "user", "content": user}]
+    return [{"role": "system", "content": _design_role(task)}, {"role": "user", "content": user}]
 
 
 SYSTEM_C = (
