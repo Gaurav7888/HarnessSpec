@@ -1,0 +1,112 @@
+{
+  "experiment": "sweqa-ad-v2",
+  "registered_at": "2026-11-25T16:03:14+05:30",
+  "upstream": "900db43a7ccdfff5281b6784c7291f902aa7213e",
+  "source_commit": "33c3e36003195cff97f58a33b693a17403cb52fe",
+  "model": {
+    "name": "qwen2.5-coder:7b",
+    "digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+    "tier": "7-14B",
+    "runtime": "ollama",
+    "ollama_version": "0.40.14",
+    "parameter_size": "7.6B",
+    "quantization": "Q4_K_M",
+    "options": {
+      "num_ctx": 16384,
+      "temperature": 0.2
+    },
+    "seed_policy": "pass the run's seed as options.seed on every call",
+    "used_by": [
+      "orchestrator",
+      "swebench_subagent",
+      "sweqa_subagent"
+    ]
+  },
+  "serving_version_target": "0.40.14",
+  "serving_version_verification": "/api/version before smoke",
+  "hardware": {
+    "cpu": "Intel Core i5-13500",
+    "nvml_module": false,
+    "nvidia_smi": false,
+    "energy_probe": {
+      "cpu": {
+        "device_joules": null,
+        "joules": null,
+        "max_sample_interval_s": null,
+        "method": "intel-rapl-package-counter",
+        "reason": "PermissionError: [Errno 13] Permission denied: '/sys/class/powercap/intel-rapl:0/energy_uj'",
+        "samples": 0,
+        "scope": "device_wide",
+        "status": "unavailable",
+        "watt_hours": null
+      },
+      "gpu": {
+        "device_joules": null,
+        "joules": null,
+        "max_sample_interval_s": null,
+        "method": "nvidia-smi-power-trapezoid",
+        "reason": "nvidia-smi not found",
+        "samples": 0,
+        "scope": "device_wide",
+        "status": "unavailable",
+        "watt_hours": null
+      },
+      "sample_period_s": 1.0,
+      "wall_clock_s": 1.000169891049154
+    }
+  },
+  "manifest": "pilot/sweqa_instances.json",
+  "manifest_sha256": "f0161d315f3b735b55b3435af9f0e6a308156db8435aa8d5e2b00763e96b272f",
+  "repository_revisions": {
+    "pallets/flask": "85c5d93cbd049c4bd0679c36fd1ddcae8c37b642",
+    "psf/requests": "46e939b5525d9c72b677340985582b04b128478a",
+    "pytest-dev/pytest": "5989efe3efec31a9d14f550d89903b6311dfc828"
+  },
+  "designers": [
+    "A",
+    "B",
+    "C",
+    "D"
+  ],
+  "seeds": [
+    1,
+    2,
+    3
+  ],
+  "n_questions": 10,
+  "target_attempts": 120,
+  "batch_order": [
+    "seed 1: A/D smoke first manifest question",
+    "seed 1: remaining A/D after smoke audit",
+    "seed 1: B/C after validating and committing the initial pilot",
+    "seed 2: A/B/C/D",
+    "seed 3: A/B/C/D"
+  ],
+  "order_within_batch": "manifest order, then seed, then designer; completed identities skipped",
+  "parent": {
+    "tools": [
+      "read_file",
+      "list_dir"
+    ],
+    "permission": "read",
+    "context": [
+      "."
+    ],
+    "max_steps": 12,
+    "max_generated_tokens": 8000,
+    "max_seconds": 900,
+    "allow_test_execution": false
+  },
+  "token_policy": "Every server prompt_eval_count and eval_count is counted once for design, repairs and execution. Execution charges generated tokens to the runtime; intercepted replies still count in the experimental ledger. Design may narrow runtime ceilings.",
+  "budget_deviation": "Common parent and runtime ceilings. Registered equal combined token budget was not enforced.",
+  "h2": "Accepted nonempty summary with zero usable_repository_citations in the pinned authorized source slice. Preserve the original syntax gate in diagnostics; report both attempt and accepted denominators.",
+  "h4": "Pair task and seed, average repeated seeds within task and resample tasks. A minus D subagent tokens. Estimate quality-adjusted amortization only on successful compatible held-out pairs. Each attempt designs afresh.",
+  "intervals": {
+    "unit": "paired task cluster",
+    "resamples": 10000,
+    "prng_seed": 20261124,
+    "confidence": 0.95
+  },
+  "grading": "Blinded independent human rubric (five dimensions, score 0\u201310, twice sum >=70). Keep accepted nonempty answers pending until an independent grade is imported.",
+  "privacy": "Coordinator retains transcripts, diagnostics, keyed energy, rows, packet, and reviewer correspondence; only aggregate counts and configuration are public."
+}
