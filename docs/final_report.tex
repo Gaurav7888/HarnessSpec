@@ -121,14 +121,14 @@ withheld from model prompts, apart from the task and allowed source slice.
 \centering
 \begin{tabularx}{\columnwidth}{lX}
 \toprule
-Hypothesis & Result and integration source \\
+Hypothesis & Observed outcome \\
 \midrule
-H1 & Genuine SWE-bench Verified execution results pending. \\
-H2 & D exceeded B and C in source-verified silence per attempt by 33.3 and 50.0 percentage points, respectively. \\
+H1 & SWE-bench Verified runs pending. \\
+H2 & D had more silent handoffs per attempt than B or C. \\
 H3 & Not supported as registered. Fixture, three seeds: first-pass valid
 C 0/3, D 0/3; D 3/3 after repair. Corpus of 15 drafts: 4 valid, 11 after
 compiler repair, 15 with model repair. \artifact{pilot/h3_results_v2.json}. \\
-H4 & D used 9,703 more tokens overall than A. No specification was reused. \\
+H4 & D used 9,703 more total tokens than A. Zero cache hits. \\
 Energy & CPU and GPU device readings unavailable on the inference host. \\
 \bottomrule
 \end{tabularx}
@@ -277,12 +277,10 @@ selector failure in v1 (\artifact{pilot/h3_results.json}, before
 tuned on these results. With one model, the tier part of H3 is untested.
 
 \subsection{H4: Design-cost amortization}
-For correct matched A/D pairs, estimate the token difference in subagent
-execution. A conditional break-even divides a measured positive priming
-design cost by positive held-out per-task savings and rounds up. Under the
-scenario, one compatible spec is reused within a repository revision and
-question type. No finite break-even exists for nonpositive savings.
-A zero or missing design cost leaves the estimate undefined. In v1, D had no successful matched pair.
+For compatible, correct A/D pairs in the same repository revision and
+question type, divide the priming cost by held-out per-task savings and
+round up. Nonpositive savings cannot recover a positive priming cost.
+V1 had no successful matched pair.
 Mean A minus D subagent cost was $-2{,}508.1$ tokens per attempt.
 In v2, A minus D averaged 1,284.5 subagent tokens per matched task
 (95\% interval $-5{,}205.3$ to $8{,}085.9$). D saved 38,535 execution
