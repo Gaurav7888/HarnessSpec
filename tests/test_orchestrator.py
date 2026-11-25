@@ -18,6 +18,8 @@ from harnessspec.validator import validate
 
 ROOT = Path(__file__).resolve().parents[1]
 VALID = json.loads((ROOT / "examples" / "valid_spec.json").read_text(encoding="utf-8"))
+# sha256 prefix of SYSTEM_D as used for pilot/h3_results_v2.json (commit 8cbb81d).
+HASH_SYSTEM_D = "644a1aed6d9e2076"
 
 
 class ScriptedModel:
@@ -221,3 +223,44 @@ class CommandRepairTests(unittest.TestCase):
         self.assertFalse(result["first_pass_valid"])
         self.assertTrue(result["valid"])
         self.assertEqual(len(model.calls), 1)
+
+
+class QaPromptTests(unittest.TestCase):
+    """The SWE-QA system message applies only to externally assessed tasks."""
+
+    def setUp(self):
+        self.card = reference_parent()
+
+    def test_coding_prompt_is_unchanged(self):
+        import hashlib
+
+        from harnessspec.orchestrator import SYSTEM_D
+
+        messages = spec_messages(fixture_task(), self.card, "m")
+        self.assertEqual(messages[0]["content"], SYSTEM_D)
+        # Pins the system message H3 v2 ran with; editing it would invalidate H3.
+        self.assertEqual(hashlib.sha256(SYSTEM_D.encode()).hexdigest()[:16],
+                         HASH_SYSTEM_D)
+
+    def test_qa_task_gets_the_qa_message_on_design_and_repair(self):
+        from harnessspec.orchestrator import SYSTEM_D_QA
+
+        task = {"task_id": "q1", "statement": "Where is X defined?", "assessment": "external_qa"}
+        draft = valid_spec()
+        draft["task_id"] = "q1"
+        draft["goal"]["acceptance_tests"] = []
+        fixed = valid_spec()
+        fixed["task_id"] = "q1"
+        model = ScriptedModel(draft, fixed)
+        design(task, self.card, "D", seed=1, client=model)
+        self.assertEqual(len(model.calls), 2)
+        for call in model.calls:
+            self.assertEqual(call["messages"][0]["content"], SYSTEM_D_QA)
+        self.assertIn("require_test_output to false", SYSTEM_D_QA)
+
+    def test_c_and_b_are_unaffected_by_assessment(self):
+        task = {"task_id": "q1", "statement": "Where is X defined?", "assessment": "external_qa"}
+        model = ScriptedModel({"instruction": "i", "context": ["src"], "tools": ["read_file"], "model": "m"})
+        result = design(task, self.card, "C", seed=1, client=model)
+        self.assertNotIn("HarnessSpec for read-only", model.calls[0]["messages"][0]["content"])
+        self.assertEqual(result["rounds"], 0)

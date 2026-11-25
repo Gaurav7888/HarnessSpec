@@ -134,3 +134,11 @@ OpenAI Codex audited Dinesh's local work at the user's request. The prompt asked
 - H3 v2: regenerated as `pilot/h3_results_v2.json` and `pilot/h3_transcripts_v2.json`. v1 (`pilot/h3_results.json`) is listed in `pilot/snapshots/sweqa-ad-seed1-v1/SHA256SUMS` and was not modified. v2 first-pass validity is C 0/3 and D 0/3, so H3 as registered fails. It is reported as such, and nothing was tuned on v2.
 - Check: `PYTHONPATH=src python3 -m unittest discover -s tests -v` passes. `pilot/results.json` is unchanged by `run_pilot.py`.
 - Model invoked: `qwen2.5-coder:7b` at the pinned digest, temperature 0.2, `num_ctx` 16384. H3 used seeds 1–3 on the fixture and seed 1 on the corpus. The fixture subagent used seed 1.
+
+## 2026-11-25 (SWE-QA design prompt)
+
+- Tool: Claude Code (Claude Opus 5.5).
+- Task: Affan accepted Dinesh's proposed patch (`docs/review/affan-external-qa.patch`), with two additions. The patch gives D a read-only QA system message whenever the runner passes `assessment="external_qa"`, for the first design call and for every repair call. The additions are two feasibility sentences: set `return_contract.require_test_output` to false, and use no hook of kind test, because the SWE-QA runner denies test hooks. In `sweqa-ad-v1` all four valid D specs demanded test output that could not exist.
+- Coding path: `SYSTEM_D` is unchanged. A test pins its hash to the version H3 v2 ran with, so H3 is unaffected. B and C are unaffected.
+- Prompt checked against output: two live D design calls on the first question in `pilot/sweqa_instances.json` (seed 1). After the first sentence, the spec was first-pass valid with `require_test_output: false` but kept a `pytest` hook, so the hook sentence was added. After the second, the spec was first-pass valid with no hooks and with `require_citations: true`. These calls are smoke checks, not results. The SWE-QA D rerun must be registered as a new experiment, and `sweqa-ad-v1` stays as reported.
+- Check: `PYTHONPATH=src python3 -m unittest discover -s tests -v` (99 tests) passes.
