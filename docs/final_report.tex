@@ -43,8 +43,10 @@ designs offline~\cite{adas}. Oskooei et al. compare retrieval and delegated
 search for repository question answering and examine handoff breakdowns on
 SWE-QA~\cite{oskooei}. The Conductor trains a 7B model with reinforcement
 learning to write natural-language instructions and communication topologies
-for a pool of worker models~\cite{conductor}. Its designs are not checked
-before workers run, which corresponds to our free-text condition B.
+for a pool of worker models~\cite{conductor}. The Conductor parses subtasks,
+worker identifiers and access lists before executing a multi-worker workflow.
+B shares its use of natural-language instructions and runs a single brief
+under a fixed harness.
 HarnessSpec evaluates per-task design under explicit
 privilege, budget, and return-evidence constraints.
 
@@ -174,8 +176,7 @@ Tokens per correct & Pending & N/A \\
 \end{table}
 
 \subsection{H3: Validity and revision}
-All four designers share one function, \texttt{design(task, card, designer,
-seed)}. C asks for the instruction, context, tools and model and is scored as
+All four designers share one function, \texttt{design()}. C asks for the instruction, context, tools and model and is scored as
 emitted. D asks for a full HarnessSpec. Its prompt contains the task, the
 parent card, the JSON Schema and the compiler's rules, but no filled-in spec,
 because the model copied such an example almost verbatim in a smoke test.
