@@ -152,3 +152,53 @@ OpenAI Codex audited Dinesh's local work at the user's request. The prompt asked
   - **A and D:** run only when valid.
   - C's H3 score is unchanged.
 - Check: `tests/test_execution.py` covers each rule and runs B and C specs end to end on the fixture with a scripted model. Offline, the six fixture B and C designs in `pilot/h3_transcripts_v2.json` were all executable under these rules. No model was called.
+
+## 2026-11-25 (report: H3 section)
+
+- Tool: Claude Code (Claude Opus 5.5).
+- Task: Affan's parts of `docs/final_report.tex`:
+  - the H3 row in Table 1, now H3 v2
+  - the H3 subsection, with Table 3 from `pilot/h3_results_v2.json`
+  - one sentence in Related work and a bibliography entry for the Conductor (arXiv:2512.04388, ICLR 2026, checked on arXiv)
+  - the repair rules in Validator and runtime
+  - the Claude Code line in the AI-tool disclosure
+- Check: compiled with `tectonic --outdir <tmp> docs/final_report.tex`: 3 pages, no undefined references, font warnings only. Every number in the H3 text was read from `pilot/h3_results_v2.json` or `pilot/subagent_fixture_pinned.json`.
+
+## 25 November 2026, Dinesh's SWE-QA v2 integration
+
+Dinesh asked OpenAI Codex to continue from upstream main, integrate the frozen designer adapter, correct the H2 measurement, preserve blinded grading, review PR #9 and run a bounded four-condition study. The implementation worktree starts at `900db43`. The private branch and tag stayed in their original checkout. No design prompt, model setting, schema, manifest or frozen artifact was edited.
+
+- `git fetch origin` and a separate worktree established the public base. The baseline unittest discovery ran 108 tests. SHA-256 verification matched all 54 entries privately and all 11 available public files. The v1 retrospective rechecked the saved citations against the three pinned archives. Ten A answers passed the old format gate without a verifiable citation. D had no accepted returns.
+- The runner now passes all four design results through the shared adapter and preserves the as-emitted validity, rejection details, both evidence measures and actual model accounting. The offline audit checks the adapter decision, source, per-call tokens and result consistency. The review preparer emits a private packet, blank grades, instructions and a provenance template. No human grades were generated.
+- The PR #9 review checked the fixture and corpus rows, compiled the PR head with Tectonic and confirmed three pages and resolved references. The Conductor paper describes a workflow format check. Codex requested a correction on GitHub, carried Affan's H3 contribution with author attribution, and narrowed the related-work comparison in the integration branch.
+- `ollama --version`, `ollama list`, `ollama show qwen2.5-coder:7b` and the server endpoints established the host's existing 0.34.0 installation. The official 0.40.14 Linux release was verified against the published archive SHA-256 and served on a separate loopback port using the installed pinned model blobs. Its API version, model digest and 16,384-token context were checked. RAPL package access was denied, and NVML bindings and NVIDIA power tooling were unavailable.
+- `run_sweqa.py --dry-run --verify-sources` checked the ten questions. The first genuine seed-1 A/D pair ran with `--limit 1`. Both sidecars passed adapter replay, source checks and token reconciliation. One attempt failed and one accepted nonempty answer went into the blinded packet. Subsequent batches use the same settings and resume completed identities. The registered equal combined-token cap was replaced by common parent/runtime ceilings with separate full-cost accounting.
+
+The A/D seed-1 checkpoint completed all 20 attempts using Ollama 0.40.14. The audit replayed adapter decisions, costs and citations for every identity. A had 5 accepted answers and 2 source-verified silent handoffs. D had 6 and 5 respectively. The private packet contained 11 pending answers. Nine failures had schema-validated finalized rows. The observed paired subagent saving was 2,121.3 tokens per task with a 95% task-bootstrap interval of [−9,448, 13,601.3]. Zero specification cache hits were recorded. The aggregate and checked serving environment were pushed before the B/C batch. Tectonic compiled the interim report to three pages with resolved references and no overfull horizontal boxes.
+
+The four-condition seed-1 checkpoint completed at 19:36 IST. The public aggregate covers 40 attempts with 17 pending answers and 23 finalized failures. D exceeded both B and C by 50 percentage points in source-verified silence per attempt (paired 95% interval [20, 80] points for each comparison). This seed points in the opposite direction to the H2 prediction. All three B and all three C accepted answers had a verified citation. No semantic grades were available. The cumulative selection for seed 2 started after the checked seed-1 aggregate was committed and pushed.
+
+The two-seed checkpoint covers 80 distinct executions across the four conditions. Source-verified silence per attempt was 4/20 for A, 2/20 for B, 0/20 for C and 10/20 for D. The D/B difference was +40 points [20, 60] and D/C was +50 [30, 70] using paired task clusters. Thirty-six accepted answers await grading. The updated ACM layout includes citation coverage, grounded return rates and runtime diagnostics. It compiled to three pages. The final 40-identity seed-3 batch began after the aggregate was committed.
+
+## 26 November 2026, completion and publication checks
+
+The last batch completed at 01:25 IST on 26 November. All 120 task/designer/seed identities ran on the pinned model. The smoke pair is included once. The coordinator retained 120 full traces, 120 diagnostics and 120 energy sidecars in the ignored experiment directory. The finalized result array contains 63 execution failures. The private reviewer packet contains all 57 accepted nonempty answers, a blank five-dimension template, instructions and a provenance form. No reviewer grades or exposure attestations had been imported. Semantic accuracy and tokens per correct answer remain pending.
+
+The full aggregate has 25 silent accepted summaries under source verification and two under the format gate. The paired D/B difference was +33.3 percentage points [13.3, 53.3] and D/C was +50.0 [30.0, 70.0]. Mean matched A minus D subagent tokens was 1,284.5 [−5,205.3, 8,085.9]. D spent 9,703 more total tokens than A after counting design. There were zero spec cache hits and no quality-adjusted break-even estimate. All 120 device readings per source were unavailable.
+
+The coordinator used the following entry points. The local execution commands specified the isolated 0.40.14 endpoint and the existing verified archive cache.
+
+~~~bash
+export PYTHONPATH=src:.
+run=pilot/experiments/sweqa-ad-v2
+python3 pilot/run_sweqa.py --designers A B C D --seeds 1 2 3 --resume --ollama-host http://127.0.0.1:11448 --archive-cache /tmp/harnessspec-sweqa-targets --energy-dir "$run/energy"
+python3 -m pilot.sweqa_metrics --archive-cache /tmp/harnessspec-sweqa-targets --output pilot/tmp/v2-control/final-replay.json
+cmp pilot/tmp/v2-control/final-replay.json "$run/abcd_seed3_metrics.json"
+python3 -m pilot.prepare_sweqa_review
+PYTHONPATH=src python3 -m unittest discover -s tests -v
+sha256sum --ignore-missing -c pilot/snapshots/sweqa-ad-seed1-v1/SHA256SUMS
+tectonic -b https://data1b.fullyjustified.net/tlextras-2022.0r0.tar --outdir pilot/tmp/v2-report docs/final_report.tex
+pdfinfo pilot/tmp/v2-report/final_report.pdf
+~~~
+
+The final replay matched the committed aggregate byte for byte. All 114 tests passed. The private and public checksum checks again matched 54 and 11 entries respectively. The final ACM PDF is three pages, with resolved references and no horizontal overflow. The review checked table layout, Git ancestry, committed paths, file sizes, candidate text, private grading IDs and credential patterns. PR #10 retains the implementation for team review. PR #9 remains open with the related-work correction requested. The public main branch still lacks genuine SWE-bench H1 results.

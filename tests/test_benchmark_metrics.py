@@ -118,6 +118,18 @@ class MetricsTests(unittest.TestCase):
         self.assertEqual(result["scenarios"][0]["matched_savings_tasks"], 1)
         self.assertEqual(result["scenarios"][0]["break_even_tasks"], 3)
 
+    def test_execution_metrics_refuse_different_treatments(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for index, protocol in enumerate(("sweqa-ad-v1", "sweqa-ad-v2")):
+                attempt = row(task_id=str(index), benchmark="sweqa")
+                write_json(root / f"{index}.json", {
+                    **{field: attempt[field] for field in KEY_FIELDS}, "row": attempt,
+                    "protocol": protocol, "diagnostics": {"return_accepted": False},
+                })
+            with self.assertRaisesRegex(ValueError, "different experiment protocols"):
+                execution_handoffs([root])
+
     def test_token_only_cost_with_no_successful_pair(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)

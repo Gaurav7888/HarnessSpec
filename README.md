@@ -19,7 +19,9 @@ Registered proposal author: Syed Affan Daimi, M.S. CS, IIIT Hyderabad.
 - One pinned model for the orchestrator, `qwen2.5-coder:7b`, in `pilot/model.json`. `src/harnessspec/llm.py` is that client. It checks the local digest against the pin and passes `num_ctx`, `temperature`, and the run's seed on every call. The fixture subagent uses `src/harnessspec/cursor_cli.py` for the historical fixture run.
 - The orchestrator: `design(task, card, designer, seed)` in `src/harnessspec/orchestrator.py`, for designers A–D. The H3 pilot is in `pilot/h3_results.json`, and every model reply is in `pilot/h3_transcripts.json`.
 
-The SWE-QA pilot completed 20 real seed-1 attempts. Ten accepted A answers await independent grading. D had no accepted return. [Audit, grading materials and integration notes](docs/SWEQA_AUDIT.md)
+The corrected SWE-QA v2 study completed 120 attempts across all four designers and three seeds. Its 57 accepted answers await independent grades. [Full aggregate](pilot/experiments/sweqa-ad-v2/abcd_seed3_metrics.json) · [ACM report](docs/final_report.pdf)
+
+The historical SWE-QA v1 pilot completed 20 real seed-1 attempts. Ten accepted A answers await independent grading. D had no accepted return. [Historical audit](docs/SWEQA_AUDIT.md) · [SWE-QA v2 experiment and review](docs/SWEQA_V2.md)
 
 ## What is not done
 

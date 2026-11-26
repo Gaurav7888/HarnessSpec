@@ -1,0 +1,447 @@
+{
+  "analysis": "source_verified_v2",
+  "designers": {
+    "A": {
+      "acceptance_rate": 0.5,
+      "accepted": 5,
+      "accuracy_all_attempts": null,
+      "accuracy_graded_answers": null,
+      "attempted": 10,
+      "attempts_by_seed": {
+        "1": 10
+      },
+      "budget_violations": 1,
+      "correct_finalized": 0,
+      "design_tokens": 0,
+      "failed_without_gradable_answer": 5,
+      "finalized_rows": 5,
+      "first_pass_validity": 1,
+      "format_silent": 1,
+      "graded_answers": 0,
+      "grounded_returns": 3,
+      "hook_failures": 0,
+      "pending_grades": 5,
+      "repository_grounded_per_attempt": 0.3,
+      "rounds": 0,
+      "silent_per_accepted": 0.4,
+      "silent_per_attempt": 0.2,
+      "subagent_tokens": 133951,
+      "tokens_per_correct": null,
+      "tool_denials": 28,
+      "total_tokens": 133951,
+      "usable_citations_in_accepted_answers": 4,
+      "verified_citation_coverage_per_accepted": 0.6,
+      "verified_silent": 2,
+      "wall_clock_s": 2458.781
+    },
+    "B": {
+      "acceptance_rate": 0.3,
+      "accepted": 3,
+      "accuracy_all_attempts": null,
+      "accuracy_graded_answers": null,
+      "attempted": 10,
+      "attempts_by_seed": {
+        "1": 10
+      },
+      "budget_violations": 0,
+      "correct_finalized": 0,
+      "design_tokens": 4836,
+      "failed_without_gradable_answer": 7,
+      "finalized_rows": 7,
+      "first_pass_validity": null,
+      "format_silent": 0,
+      "graded_answers": 0,
+      "grounded_returns": 3,
+      "hook_failures": 0,
+      "pending_grades": 3,
+      "repository_grounded_per_attempt": 0.3,
+      "rounds": 0,
+      "silent_per_accepted": 0.0,
+      "silent_per_attempt": 0.0,
+      "subagent_tokens": 148153,
+      "tokens_per_correct": null,
+      "tool_denials": 40,
+      "total_tokens": 152989,
+      "usable_citations_in_accepted_answers": 5,
+      "verified_citation_coverage_per_accepted": 1.0,
+      "verified_silent": 0,
+      "wall_clock_s": 2679.273
+    },
+    "C": {
+      "acceptance_rate": 0.3,
+      "accepted": 3,
+      "accuracy_all_attempts": null,
+      "accuracy_graded_answers": null,
+      "attempted": 10,
+      "attempts_by_seed": {
+        "1": 10
+      },
+      "budget_violations": 2,
+      "correct_finalized": 0,
+      "design_tokens": 4285,
+      "failed_without_gradable_answer": 7,
+      "finalized_rows": 7,
+      "first_pass_validity": 0,
+      "format_silent": 0,
+      "graded_answers": 0,
+      "grounded_returns": 3,
+      "hook_failures": 0,
+      "pending_grades": 3,
+      "repository_grounded_per_attempt": 0.3,
+      "rounds": 0,
+      "silent_per_accepted": 0.0,
+      "silent_per_attempt": 0.0,
+      "subagent_tokens": 163528,
+      "tokens_per_correct": null,
+      "tool_denials": 32,
+      "total_tokens": 167813,
+      "usable_citations_in_accepted_answers": 3,
+      "verified_citation_coverage_per_accepted": 1.0,
+      "verified_silent": 0,
+      "wall_clock_s": 3460.357
+    },
+    "D": {
+      "acceptance_rate": 0.6,
+      "accepted": 6,
+      "accuracy_all_attempts": null,
+      "accuracy_graded_answers": null,
+      "attempted": 10,
+      "attempts_by_seed": {
+        "1": 10
+      },
+      "budget_violations": 1,
+      "correct_finalized": 0,
+      "design_tokens": 16034,
+      "failed_without_gradable_answer": 4,
+      "finalized_rows": 4,
+      "first_pass_validity": 0.3,
+      "format_silent": 0,
+      "graded_answers": 0,
+      "grounded_returns": 1,
+      "hook_failures": 0,
+      "pending_grades": 6,
+      "repository_grounded_per_attempt": 0.1,
+      "rounds": 7,
+      "silent_per_accepted": 0.8333333333333334,
+      "silent_per_attempt": 0.5,
+      "subagent_tokens": 112738,
+      "tokens_per_correct": null,
+      "tool_denials": 45,
+      "total_tokens": 128772,
+      "usable_citations_in_accepted_answers": 1,
+      "verified_citation_coverage_per_accepted": 0.16666666666666666,
+      "verified_silent": 5,
+      "wall_clock_s": 2707.6
+    }
+  },
+  "energy": {
+    "cpu": {
+      "coverage": 0,
+      "joules": null,
+      "statuses": {
+        "unavailable": 40
+      }
+    },
+    "gpu": {
+      "coverage": 0,
+      "joules": null,
+      "statuses": {
+        "unavailable": 40
+      }
+    }
+  },
+  "h2": {
+    "D_vs_B": {
+      "silent_per_accepted_pp": {
+        "ci95_given_defined": [
+          50.0,
+          100.0
+        ],
+        "defined_resamples": 9722,
+        "difference_pp": 83.33333333333334
+      },
+      "silent_per_attempt_pp": {
+        "bootstrap_seed": 20261124,
+        "ci95": [
+          20,
+          80
+        ],
+        "difference": 50,
+        "excluded_left": 0,
+        "excluded_right": 0,
+        "matched_observations": 10,
+        "matched_seeds": [
+          1
+        ],
+        "matched_seeds_by_task": [
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:1"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:17"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:35"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:43"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:18"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:24"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:34"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:44"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "requests:30"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "requests:48"
+          }
+        ],
+        "matched_tasks": 10,
+        "resamples": 10000
+      }
+    },
+    "D_vs_C": {
+      "silent_per_accepted_pp": {
+        "ci95_given_defined": [
+          50.0,
+          100.0
+        ],
+        "defined_resamples": 9722,
+        "difference_pp": 83.33333333333334
+      },
+      "silent_per_attempt_pp": {
+        "bootstrap_seed": 20261124,
+        "ci95": [
+          20,
+          80
+        ],
+        "difference": 50,
+        "excluded_left": 0,
+        "excluded_right": 0,
+        "matched_observations": 10,
+        "matched_seeds": [
+          1
+        ],
+        "matched_seeds_by_task": [
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:1"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:17"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:35"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "flask:43"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:18"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:24"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:34"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "pytest:44"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "requests:30"
+          },
+          {
+            "benchmark": "sweqa",
+            "seeds": [
+              1
+            ],
+            "task_id": "requests:48"
+          }
+        ],
+        "matched_tasks": 10,
+        "resamples": 10000
+      }
+    }
+  },
+  "h4": {
+    "attempt_cost_status": "requires_reuse_scenario",
+    "conditional_reuse_scenarios": [],
+    "matched_correct_pairs": 0,
+    "observed_A_minus_D_subagent_tokens": {
+      "bootstrap_seed": 20261124,
+      "ci95": [
+        -9448,
+        13601.3
+      ],
+      "difference": 2121.3,
+      "excluded_left": 0,
+      "excluded_right": 0,
+      "matched_observations": 10,
+      "matched_seeds": [
+        1
+      ],
+      "matched_seeds_by_task": [
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:1"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:17"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:35"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "flask:43"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:18"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:24"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:34"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "pytest:44"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "requests:30"
+        },
+        {
+          "benchmark": "sweqa",
+          "seeds": [
+            1
+          ],
+          "task_id": "requests:48"
+        }
+      ],
+      "matched_tasks": 10,
+      "resamples": 10000
+    },
+    "observed_spec_cache_hits": 0,
+    "quality_adjusted_status": "undefined"
+  },
+  "protocol": "sweqa-ad-v2"
+}

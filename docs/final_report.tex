@@ -22,11 +22,14 @@
 HarnessSpec represents an orchestrator's delegation policy as a typed
 specification that a deterministic validator can check before a subagent runs.
 The protocol bounds repair, tool privileges, and execution, and checks evidence
-at the return gate. In a ten-question SWE-QA pilot, A produced ten accepted
-answers awaiting independent grading. D produced no accepted return and
-consumed 62,946 tokens versus A's 6,026. Both had zero silent handoffs.
-We distinguish this single-seed evidence from the fixture experiments and the
-registered four-condition study.
+at the return gate. On a code fixture, both tuple and full-spec designs
+failed all three first-pass checks. Bounded repair made all three full
+specifications valid. In the original ten-question SWE-QA pilot, none of
+ten accepted answers contained a verifiable repository citation.
+The corrected experiment completed 120 attempts on the same ten questions.
+D returned an accepted answer without a verified citation in 15 of 30
+attempts, compared with 5 of 30 for B and 0 of 30 for C.
+All 57 accepted answers await independent grading.
 \end{abstract}
 \maketitle
 
@@ -41,7 +44,13 @@ AOrchestra represents the instruction, context, tools and model of a subagent as
 a tuple~\cite{aorchestra}. Automated Design of Agentic Systems searches agent
 designs offline~\cite{adas}. Oskooei et al. compare retrieval and delegated
 search for repository question answering and examine handoff breakdowns on
-SWE-QA~\cite{oskooei}. HarnessSpec evaluates per-task design under explicit
+SWE-QA~\cite{oskooei}. The Conductor trains a 7B model with reinforcement
+learning to write natural-language instructions and communication topologies
+for a pool of worker models~\cite{conductor}. The Conductor parses
+three aligned lists of subtasks, workers and access rules before execution.
+B shares its use of natural-language instructions and delegates one brief
+to a single worker under a fixed harness.
+HarnessSpec evaluates per-task design under explicit
 privilege, budget, and return-evidence constraints.
 
 \section{HarnessSpec protocol}
@@ -54,8 +63,13 @@ and receives bounded validation and repair.
 
 \section{Validator and runtime}
 The validator checks structure, path and privilege bounds, feasible budgets,
-model tier, and named verification commands. The designer receives typed errors
-and can revise a rejected draft for up to three rounds. In the live loop, each
+model tier, and named verification commands. Repair is deterministic. It
+clamps privileges and budgets, removes unknown fields, supplies default stop
+rules, hooks and return contracts, and reduces an allowlisted command written
+with arguments (\texttt{pytest tests/x.py::t}) to its name, because the task,
+not the spec, selects which tests run. It never writes a goal, an acceptance
+test or a context slice. Typed errors that remain are returned to the
+designer with the values the parent card allows, for up to three rounds. In the live loop, each
 model reply becomes one action, and \texttt{Session.step} applies budget checks,
 tool grants and the return gate. For SWE-QA, tool access is read-only and
 hooks that execute repository code are denied. The gate checks evidence
@@ -63,11 +77,16 @@ structure. External evaluation checks whether citations match the source.
 
 \section{Experimental methodology}
 The registered study proposes approximately 60 tasks per benchmark and at least
-three seeds per condition. The A/D pilot targets ten tasks at seed 1.
+three seeds per condition. Both SWE-QA treatments use the same ten
+questions at three pinned revisions. V1 paired A and D at seed 1.
+V2 completed 120 attempts at seeds 1, 2 and 3.
 The pinned \artifact{qwen2.5-coder:7b} build runs in Ollama with context
-length 16,384 and temperature 0.2. A and D share a parent subagent ceiling.
+length 16,384 and temperature 0.2. All conditions receive the same read-only parent card, with execution
+ceilings of 12 actions, 8,000 generated tokens and 900 seconds.
 Experimental token totals include all reported design, repair, prompt, and
-generation tokens. The pilot does not enforce a single combined budget.
+generation tokens. The registered
+equal combined-budget requirement was relaxed. Design and repair costs
+accrue outside the execution ceiling, with full server costs counted once.
 Failures contribute to denominators and costs. Token efficiency divides
 all consumed tokens by the number of correct results. The analysis pairs
 task and seed, then bootstraps task clusters for percentile intervals.
@@ -89,142 +108,222 @@ quality. Its pilot includes ten released what, why, where and how questions
 from Flask, Requests, and pytest. The selector pins the authors' dataset release
 and repository revisions and verifies evidence paths and line bounds.
 The pilot uses the five published scoring dimensions and the 70/100 pass
-threshold. A blinded packet awaits independent human grading. Citations are verified
+threshold. The five dimensions are correctness, completeness, relevance, clarity and
+reasoning, each scored from 0 to 10. The total is twice their sum.
+Accepted nonempty answers enter a private, blinded human-review packet. Citations are verified
 separately from the answer grade. Repository metadata and gold answers are
 withheld from model prompts, apart from the task and allowed source slice.
 
 \section{Results}
 \begin{table}[t]
-\caption{Evidence available for the initial A/D pilot and related tests.}
+\caption{Hypothesis outcomes and scope.}
 \label{tab:results}
 \centering
 \begin{tabularx}{\columnwidth}{lX}
 \toprule
-Hypothesis & Result and integration source \\
+Hypothesis & Observed outcome \\
 \midrule
-H1 & Pending. Gaurav: \artifact{pilot/swebench_results.json}. \\
-H2 & A/D pilot recorded zero silent handoffs in both conditions. D/B and
-D/C pending. \artifact{pilot/sweqa_results.json} and
-\artifact{pilot/metrics_results.json}. \\
-H3 & Fixture design pilot. C: 0/3 valid as emitted. D: 1/3 first-pass valid,
-3/3 after repair. Affan: \artifact{pilot/h3_results.json}. \\
-H4 & No successful matched pairs or observed cache reuse. Marginal D subagent cost exceeded A.
-\artifact{pilot/metrics_results.json}. \\
-Energy & Unavailable on development host. Source:
-\artifact{pilot/traces/sweqa-energy/}. \\
+H1 & SWE-bench Verified runs pending. \\
+H2 & D had more silent handoffs per attempt than B or C. \\
+H3 & Not supported as registered. Fixture, three seeds: first-pass valid
+C 0/3, D 0/3; D 3/3 after repair. Corpus of 15 drafts: 4 valid, 11 after
+compiler repair, 15 with model repair. \artifact{pilot/h3_results_v2.json}. \\
+H4 & D used 9,703 more total tokens than A. Zero cache hits. \\
+Energy & CPU and GPU device readings unavailable on the inference host. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{H1: Resolution and cost}
-\textbf{Gaurav integration.} Add SWE-bench Verified counts and the paired
-accuracy interval relative to the five-point margin. Include the token
-difference, tokens per correct, and seed coverage.
+The SWE-bench Verified manifest contains ten issues. Genuine execution
+artifacts from that benchmark are pending. No estimate of the registered
+non-inferiority margin or joint cost outcome is available.
 
 \subsection{H2: Silent handoffs}
-The gate marks an accepted, nonempty answer as silent when it has no
-structurally usable file-line evidence. Both conditions had zero silent
-handoffs over ten attempts. Across ten matched tasks at seed 1, the paired
-estimate was 0 percentage points with a task-bootstrap 95\% interval of [0, 0].
-The interval is degenerate because no paired differences were observed.
-The small sample provides no evidence of equivalence. A accepted ten returns
-without reading a file. Every answer passed the structural citation check,
-and zero contained a citation verifiable in the pinned source. Its
-conditioned silent rate was 0/10. D accepted none (0/10 attempts), leaving
-its conditioned rate undefined. Six D designs failed on unknown acceptance commands after
-repair. The model supplied pytest arguments despite receiving exact command
-IDs and typed repair hints. All four runnable D designs authorized nonexistent
-paths and required test output despite empty hooks. Their 48 intercepted
-replies were valid JSON with the wrong action kind. The common prompt showed
-examples outside the selected grants. Each loop bought one additional return
-at zero remaining steps (2,813 tokens total), intercepted before the gate.
-A prospective fix aligns examples and checks available budget before inference.
-A separate target-type dispatch defect could interchange directory listing and
-file reading; none of the 48 actions reached tool dispatch. The registered H2 contrasts still require the
-uncompiled B brief and the as-emitted C tuple adapters.
+In v1 the format gate recorded zero silent handoffs for both A and D.
+A returned ten nonempty answers on the first call without reading a file.
+Rechecking every citation against the pinned source found zero usable
+citations. On the retrospective source-verified definition, A had ten
+silent handoffs in ten attempts and ten accepted returns. D had zero
+silent handoffs in ten attempts and no accepted returns, so its conditional
+rate is undefined. Six D designs failed validation. The four executable
+ones authorized missing paths, required unavailable test output and
+produced 48 intercepted actions. The frozen v1 rows retain the format
+definition and their original costs (A 6,026, D 62,946 total tokens).
+
+In v2, each design goes through the shared adapter. B runs its prose brief
+under the baseline harness. C uses its emitted instruction, context, tools
+and model subject to parent authorization. C's structural score describes
+the emitted tuple. Compiled validity is inapplicable to B.
+D uses its own validated specification. Rejected designs count in the
+attempt denominator with their actual design costs and zero execution tokens.
+
+A v2 silent handoff requires an accepted nonempty summary with zero
+repository-verified citations. The evaluator resolves the cited file
+inside the authorized snapshot and checks the 1-based line against its
+length. A valid line provides a location; the human reviewer determines
+whether it supports the answer. Coverage is the fraction of accepted
+returns with at least one verified citation. The grounded-return rate
+uses all attempts as its denominator. A rejection or budget stop cannot
+produce a silent accepted handoff.
 
 \begin{table}[t]
-\caption{SWE-QA seed-1 outcomes. Pending A grades remain outside the
-scored result array. The complete execution metrics use all 20 traces.}
-\label{tab:sweqa}
+\caption{SWE-QA v2. Accepted returns and source-verified silent handoffs use the displayed denominators. Cited counts accepted summaries with a verified file and line.}
 \centering
-\begin{tabular}{lcc}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}
 \toprule
-Measure & A & D \\
+Arm & Acc./run & Silent/run & Silent/acc. & Cited/acc. & Cited/run \\
 \midrule
-Planned attempts & 10 & 10 \\
-Completed attempts & 10 & 10 \\
-Accepted / silent returns & 10 / 0 & 0 / 0 \\
-First-pass valid designs & 10 & 4 \\
-Answer accuracy & Pending & 0/10 \\
-Total design + subagent tokens & 6,026 & 62,946 \\
-Tokens per correct & Pending & N/A \\
+A & 19/30 & 5/30 & 5/19 & 14/19 & 14/30 \\
+B & 13/30 & 5/30 & 5/13 & 8/13 & 8/30 \\
+C & 9/30 & 0/30 & 0/9 & 9/9 & 9/30 \\
+D & 16/30 & 15/30 & 15/16 & 1/16 & 1/30 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+\begin{table}[t]
+\caption{SWE-QA v2 costs across all attempts. First pass measures the original design. Rounds counts repairs.}
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Arm & Design & Subagent & Total & First pass & Rounds \\
+\midrule
+A & 0 & 314,775 & 314,775 & 30/30 & 0 \\
+B & 17,132 & 504,872 & 522,004 & N/A & 0 \\
+C & 12,884 & 500,620 & 513,504 & 0/30 & 0 \\
+D & 48,238 & 276,240 & 324,478 & 9/30 & 21 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\caption{V2 runtime and grading status across all attempts. Budget counts intercepted over-budget actions. Preflight stops require no extra action. Wall time includes design and execution.}
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Arm & Budget & Denials & Hooks failed & Wall (min) & Pending \\
+\midrule
+A & 2 & 74 & 0 & 92.4 & 19 \\
+B & 3 & 93 & 0 & 163.9 & 13 \\
+C & 6 & 106 & 0 & 173.4 & 9 \\
+D & 1 & 194 & 0 & 107.3 & 16 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Across all attempts, source-verified silence was higher for D than B by
+33.3 percentage points (95\% interval 13.3 to 53.3) and higher than C
+by 50.0 points (30.0 to 70.0). Each comparison pairs 30 runs across
+ten task clusters. This goes against the H2 prediction. Conditional on
+acceptance, D exceeded B by 55.3 points and C by 93.8 points.
+The format gate alone flagged two answers across all four conditions.
+Source verification identified 25 silent handoffs.
+The 63 execution failures have finalized result rows. All 57 accepted
+answers await independent grading, leaving semantic accuracy and tokens
+per correct answer pending.
+
 \subsection{H3: Validity and revision}
-\textbf{Affan integration.} The committed model-generated fixture design
-pilot and the scripted corpus use different inputs. The fixture numbers in
-Table~\ref{tab:results} come from the existing H3 artifact. C omits required
-full-spec fields by construction. In the separate 15-spec corpus, 4 were
-initially valid, 11 passed compiler-only repair, and 14 passed with model
-repair. Add the complete error and cost breakdown from
-\artifact{docs/sections/h3_draft.md}. The tier comparison remains unmeasured.
+All four designers share one function, \texttt{design()}. C asks for the instruction, context, tools and model and is scored as
+emitted. D asks for a full HarnessSpec. Its prompt contains the task, the
+parent card, the JSON Schema and the compiler's rules, but no filled-in spec,
+because the model copied such an example almost verbatim in a smoke test.
+Decoding enforces JSON syntax only, so structural errors remain the model's.
+
+\begin{table}[t]
+\caption{H3 on \artifact{fixtures/off_by_one}, seeds 1--3
+(\artifact{pilot/h3_results_v2.json}).}
+\label{tab:h3}
+\centering
+\begin{tabular}{lcccc}
+\toprule
+Designer & First pass & Final & Calls & Design tokens \\
+\midrule
+C & 0/3 & 0/3 & 1 & 402 \\
+D & 0/3 & 3/3 & 1 & 1,602 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+H3 as registered is not supported: first-pass validity does not rise from C
+to D (Table~\ref{tab:h3}). Every first D reply wrote its acceptance test and
+hook as \texttt{pytest tests/test\_app.py::\ldots}, and two of three filled
+the model digest with a placeholder. The compiler cleared both in one round
+without a second model call. Each C reply lacked the fields the tuple does not
+carry and a model tier, and two of three gave a tool a path outside its grant.
+
+The 15 hand-written corpus specs were also given to D's repair loop as first
+drafts. Four were valid as written. The compiler alone made 11 valid. With the
+model answering the remaining typed errors, all 15 became valid within two
+rounds for 7,268 design tokens. The four the model added are exactly those the
+compiler may not fix: a missing acceptance test, a context path that left the
+workspace, an empty goal, and the four-field tuple. No D design ended with a
+missing acceptance test.
+
+The supported claim is therefore narrower. Typed validation with bounded
+repair turns D's invalid first replies into valid specs, at about four times
+C's design cost, but it does not make the orchestrator's first reply valid. On
+the fixture end to end (\artifact{pilot/subagent_fixture_pinned.json}), A and
+D both resolved; D spent 1,603 design and 1,770 subagent tokens against A's
+1,239 subagent tokens. Three seeds on one task are a pilot. C cannot be
+valid under this validator by construction. Two prompt and compiler changes
+followed inspection of earlier output and preceded this run: error hints with
+an unchanged-reply stop, and command reduction, which followed the same
+selector failure in v1 (\artifact{pilot/h3_results.json}, before
+\texttt{pytest} joined the allowlist) and in six SWE-QA designs. Nothing was
+tuned on these results. With one model, the tier part of H3 is untested.
 
 \subsection{H4: Design-cost amortization}
-For correct matched A/D pairs, estimate the token difference in subagent
-execution. A conditional break-even divides a measured positive priming
-design cost by positive held-out per-task savings and rounds up. Under the
-scenario, one compatible spec is reused within a repository revision and
-question type. No finite break-even exists for nonpositive savings.
-A zero or missing design cost leaves the estimate undefined. The primary
-pilot does not reuse cached specs. D resolved zero runs, so there is no
-successful matched pair for a quality-adjusted estimate. Across all attempted
-pairs, A used 6,026 subagent tokens and D used 31,107. The mean saving was
-$-2{,}508.1$ tokens per attempted task. Any positive design cost would
-have no finite break-even if this marginal cost persisted. An observed reuse
-experiment requires validated rebinding of task-specific goals.
+For compatible, correct A/D pairs in the same repository revision and
+question type, divide the priming cost by held-out per-task savings and
+round up. Nonpositive savings cannot recover a positive priming cost.
+V1 had no successful matched pair.
+Mean A minus D subagent cost was $-2{,}508.1$ tokens per attempt.
+In v2, A minus D averaged 1,284.5 subagent tokens per matched task
+(95\% interval $-5{,}205.3$ to $8{,}085.9$). D saved 38,535 execution
+tokens across 30 matched pairs, spent 48,238 on design and used 9,703
+more tokens overall. Differences in acceptance and early stops contribute
+to this comparison. With no graded successful pairs, a quality-adjusted
+break-even is undefined. Every attempt designed afresh, with zero
+specification cache hits.
 
 \section{Energy efficiency}
-The optional CPU meter reads RAPL package counters from one controller
-family. The NVIDIA meter estimates energy by trapezoidal integration of
-sampled power. Both measure device-wide energy. The development host
-denied access to the CPU counter and did not expose NVIDIA power tooling.
-All 20 sidecars have unavailable CPU and GPU readings. Joules, Wh, and
-success per kWh remain unavailable.
+The CPU meter reads RAPL package counters. The NVIDIA meter integrates
+sampled device-wide power. The host denied access to the package counter
+and exposed neither NVIDIA power tooling nor the NVML Python module.
+All 20 v1 and 120 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
 
 \section{Threats to validity and limitations}
-Purposive tasks from three repositories share project context and do not
-represent the full SWE-QA distribution. Published answers can contain
-citation offsets or incomplete evidence. A human adaptation of the
-published rubric limits comparison to model-judged results. A single seed
-gives no estimate of seed-to-seed variation. A structured citation can pass
-the gate while naming an incorrect file or line. Six invalid D designs and four runtime stops offered no opportunity for
-D to produce a silent accepted handoff. The unequal combined budgets
-and the version 0.1 requirement for a named acceptance command limit
-interpretation of differences between designs. No existing named goal
-command can assess semantic QA accuracy. The development host and
-absence of device-wide measurements limit energy conclusions. The fixed
-run order and model warm-up can affect wall-clock comparisons. The local
-server used Ollama 0.34.0 with the pinned digest. The pin was recorded
-under Ollama 0.40.14. The fixture
-runs demonstrate mechanisms on a toy repository, while the model-generated
-H3 rows only probe one tier. Additional conditions, repeated seeds, and the
-full registered scale remain separate milestones.
+The reduced study comprises ten purposively selected questions across
+three repositories. Task-cluster intervals preserve repeated seeds but
+share repository context and do not establish population-level effects.
+Acceptance differs across conditions, so fewer silent handoffs per
+attempt can arise through rejection. Reference annotations may contain
+offsets or incomplete evidence. Independent human application of the
+published rubric limits comparison with model-judged results.
+Common runtime ceilings allow different combined token expenditure.
+The required named goal command cannot grade semantic QA accuracy.
+V1 used Ollama 0.34.0 with weights registered under 0.40.14.
+V2 used the pinned serving release, Ollama 0.40.14. Fixed run order, server warm-up and a single CPU host limit
+wall-clock comparisons. H3 measures one fixture and one model tier.
 
 \section{Conclusion}
-HarnessSpec provides an executable, inspectable delegation contract. The
-shared result schema and read-only runner make subsequent benchmark runs
-auditable, including refusals and design failures. Accuracy, handoff
-reliability and amortization require completed and independently assessed
-benchmark runs.
+HarnessSpec makes delegation policy and its repair costs observable.
+The fixture supports a gain in final validity after repair. SWE-QA
+measures handoff acceptance and source location separately from semantic
+accuracy. Claims about successful reuse require an experiment that
+actually reuses a validated specification.
 
 \section{Reproducibility and AI-tool disclosure}
-\artifact{docs/SWEQA.md} specifies dataset, model, commands, evaluation,
+\artifact{docs/SWEQA_V2.md} specifies the corrected protocol and analysis. \artifact{docs/SWEQA.md} specifies dataset, model, commands, evaluation,
 and output provenance. \artifact{docs/SWEQA_AUDIT.md} links the frozen
 checksums, all 48 action classifications and the offline reviewer workflow. \artifact{docs/AI_USE.md} records OpenAI Codex
-implementation and verification alongside earlier team tool use. Ollama
+implementation and verification, Claude Code for the orchestrator, compiler
+repair and H3 work, and earlier team tool use, with each prompt change made
+after inspecting output. Ollama
 supplies the pinned experimental model. Scripted fixtures, mocked tests,
 and genuine benchmark executions are tracked independently.
 
@@ -239,6 +338,10 @@ Automated Design of Agentic Systems. 2024.
 Amirkia Rafiei Oskooei et al. 2026.
 Deep Agentic Search for Repository-Level Code Question Answering:
 An Empirical Study. \url{https://arxiv.org/abs/2608.01507}.
+\bibitem{conductor}
+Stefan Nielsen, Edoardo Cetin, Peter Schwendeman, Qi Sun, Jinglue Xu, and
+Yujin Tang. 2026. Learning to Orchestrate Agents in Natural Language with the
+Conductor. In \emph{ICLR}. \url{https://arxiv.org/abs/2512.04388}.
 \bibitem{peng}
 Weihan Peng et al. 2026. SWE-QA: Can Language Models Answer
 Repository-level Code Questions? In \emph{Findings of ACL}, 8230--8245.

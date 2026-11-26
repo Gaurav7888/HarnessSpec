@@ -199,12 +199,16 @@ def execution_handoffs(paths: list[Path], finalized: list[dict] | None = None) -
     rows = []
     diagnostics = {}
     pending = defaultdict(int)
+    protocols = set()
     scored = {result_key(row): row for row in finalized or [] if row["benchmark"] == "sweqa"}
     for directory in paths:
         if not directory.is_dir():
             raise ValueError(f"{directory}: expected a completed execution trace directory")
         for path in sorted(directory.glob("*.json")):
             trace = json.loads(path.read_text(encoding="utf-8"))
+            protocols.add(trace.get("protocol"))
+            if len(protocols) > 1:
+                raise ValueError("cannot pool traces from different experiment protocols")
             row = trace["row"]
             key = result_key(row)
             if key != result_key(trace) or key[0] != "sweqa":

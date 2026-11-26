@@ -1,4 +1,4 @@
-"""Run the read-only SWE-QA A/D pilot and finalize externally graded results."""
+"""Run the read-only SWE-QA designer experiment and finalize externally graded results."""
 
 from __future__ import annotations
 
@@ -15,8 +15,9 @@ from time import monotonic
 from typing import Callable
 from urllib.error import HTTPError
 
+from harnessspec.execution import NotExecutable, executable_spec
 from harnessspec.hooks import HookOutcome, run_hook
-from harnessspec.llm import OllamaClient, load_pin
+from harnessspec.llm import DEFAULT_HOST, OllamaClient, load_pin
 from harnessspec.orchestrator import design
 from harnessspec.paths import resolve_inside
 from harnessspec.results import (
@@ -172,30 +173,44 @@ def check_evidence(instance: dict, answer: dict | None, workspace: Path) -> dict
     }
 
 
+def source_verified_silent(accepted: bool, answer: dict | None, evidence: dict | None) -> bool:
+    """Count accepted nonempty summaries without a usable file and line."""
+    if not accepted or not answer or not answer["summary"].strip():
+        return False
+    if evidence is None:
+        raise ValueError("missing source verification for an accepted answer")
+    return evidence["usable_repository_citations"] == 0
+
+
 def run_attempt(instance: dict, designer: str, seed: int, pin: dict, workspace: Path,
                 client, checkpoint: Callable | None = None) -> dict:
     started = monotonic()
-    if designer not in {"A", "D"}:
-        raise ValueError("SWE-QA execution is available for designers A and D")
     key = {"benchmark": "sweqa", "task_id": instance["question_id"], "designer": designer, "seed": seed}
     card = read_only_card()
     recorder = RecordingClient(client, checkpoint)
     # The A branch of the shared designer uses fixed_generic_harness and performs no model call.
-    result = design(task_prompt(instance), card, designer, seed=seed, client=recorder)
+    task = task_prompt(instance)
+    result = design(task, card, designer, seed=seed, client=recorder)
     trace = answer = None
-    if result["valid"]:
-        trace, answer = run_answer(instance, result["spec"], card, workspace, recorder, seed)
+    rejection = spec = None
+    try:
+        spec = executable_spec(result, task, card)
+    except NotExecutable as error:
+        rejection = {"reason": error.reason, "detail": error.detail}
+    else:
+        trace, answer = run_answer(instance, spec, card, workspace, recorder, seed)
     run_seconds = monotonic() - started
     accepted = trace is not None and trace.return_accepted is True
+    evidence = check_evidence(instance, answer, workspace)
     grading_id = None
     if accepted and answer is not None and answer["summary"].strip():
         grading_id = fingerprint([key, instance["revision"], answer])
     row = {
         **key, "model": pin["name"], "model_digest": pin["digest"],
         "design_tokens": recorder.tokens("design"), "subagent_tokens": recorder.tokens("subagent"),
-        "rounds": result["rounds"], "first_pass_valid": result["first_pass_valid"],
+        "rounds": result["rounds"], "first_pass_valid": False if designer == "B" else result["first_pass_valid"],
         "resolved": None if grading_id else False,
-        "silent_handoff": trace.silent_handoff if trace else False,
+        "silent_handoff": source_verified_silent(accepted, answer, evidence),
         "budget_violations": trace.budget_violations if trace else 0,
         "tool_denials": trace.tool_denials if trace else 0,
         "hook_failures": sum(not hook.passed for hook in trace.hooks) if trace else 0,
@@ -206,10 +221,12 @@ def run_attempt(instance: dict, designer: str, seed: int, pin: dict, workspace: 
         "row": row, "design": result, "parent_card": card.to_dict(),
         "runtime_trace": trace.as_dict() if trace else None,
         "transcript": recorder.calls, "answer": answer,
-        "grading_id": grading_id, "evidence": check_evidence(instance, answer, workspace),
+        "grading_id": grading_id, "evidence": evidence, "executable_spec": spec,
         "diagnostics": {
             "return_accepted": accepted, "design_valid": result["valid"],
-            "design_tokens_measured": designer == "D" and row["design_tokens"] > 0,
+            "not_executable": rejection, "compiled_validity_applicable": designer != "B",
+            "format_silent_handoff": trace.silent_handoff if trace else False,
+            "design_tokens_measured": designer != "A" and row["design_tokens"] > 0,
             "reuse_group": f"{instance['repo']}@{instance['revision']}/{instance.get('question_type', 'unknown')}",
         },
     }
@@ -272,6 +289,8 @@ def load_artifact(path: Path, key: tuple, instance: dict, pin: dict, grade_only:
             or record["pin_hash"] != fingerprint(pin)):
         raise ValueError(f"{path}: trace identity, protocol, manifest, or model pin changed")
     accepted = record["diagnostics"]["return_accepted"]
+    if record["protocol"] == PROTOCOL and "format_silent_handoff" not in record["diagnostics"]:
+        raise ValueError(f"{path}: incompatible pre-integration handoff definition")
     answer = record["answer"]
     expected_id = None
     if accepted and answer is not None and answer["summary"].strip():
@@ -323,6 +342,9 @@ def run_locked(args, plan: list[tuple], pin: dict, stack: ExitStack) -> None:
     finalized = {result_key(row): row for row in existing}
     grades = load_grades(args.grades)
     selected = {key: instance for key, instance in plan}
+    planned_paths = {artifact_path(args.trace_dir, key) for key in selected}
+    if set(args.trace_dir.glob("*.json")) - planned_paths or finalized.keys() - selected.keys():
+        raise ValueError("resume with a cumulative selection to preserve the complete result and grading packet")
     saved = {}
     for key, instance in plan:
         path = artifact_path(args.trace_dir, key)
@@ -342,7 +364,7 @@ def run_locked(args, plan: list[tuple], pin: dict, stack: ExitStack) -> None:
         if (derived is None and args.grade_only) or (derived is not None and derived != finalized[key]):
             raise ValueError(f"{key}: existing result conflicts with trace or grades; use a new output")
     if pending_runs:
-        client = OllamaClient(pin)
+        client = OllamaClient(pin, host=getattr(args, "ollama_host", DEFAULT_HOST))
         workspaces = prepare_sources([selected[key] for key in pending_runs], args.archive_cache, stack)
         for key in pending_runs:
             instance = selected[key]
@@ -402,8 +424,9 @@ def prepare_sources(instances: list[dict], cache: Path, stack: ExitStack) -> dic
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--instances", type=Path, default=Path("pilot/sweqa_instances.json"))
-    parser.add_argument("--designers", nargs="+", choices=list("AD"), default=list("AD"))
+    parser.add_argument("--designers", nargs="+", choices=list("ABCD"), default=list("AD"))
     parser.add_argument("--seeds", nargs="+", type=int, default=[1])
+    parser.add_argument("--ollama-host", default=DEFAULT_HOST)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--output", type=Path, default=EXPERIMENT / "results.json")
     parser.add_argument("--trace-dir", type=Path, default=EXPERIMENT / "traces")

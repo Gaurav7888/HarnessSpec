@@ -37,4 +37,4 @@ PYTHONPATH=src python3 pilot/metrics.py "$run_dir/results.json" \
   --json-output "$run_dir/metrics.json" --markdown-output "$run_dir/metrics.md"
 ~~~
 
-Separate prospective runs use the public branch tip. The prospective code has offline regression coverage. Independent grades, a combined-budget experiment, B/C execution semantics, further seeds, measured caching benefits and supported energy hardware remain outstanding.
+The v2 protocol and aggregate results have their own experiment directory. The coordinator retains per-attempt artifacts and the blinded reviewer packet locally. The protocol records the approved budget departure and the shared execution rules for B and C. [SWE-QA v2 methods and grading](SWEQA_V2.md)
