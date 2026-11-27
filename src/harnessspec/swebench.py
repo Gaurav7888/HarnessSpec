@@ -87,14 +87,18 @@ def git_clone(instance: dict, dest: Path) -> None:
     url = instance.get("clone_url") or f"https://github.com/{instance['repo']}.git"
     env = os.environ.copy()
     env["GIT_TERMINAL_PROMPT"] = "0"
-    if not (dest / ".git").exists():
+    def fresh_clone() -> None:
         if dest.exists():
             shutil.rmtree(dest)
         subprocess.run(["git", "clone", url, str(dest)], check=True, env=env)
-    subprocess.run(
-        ["git", "checkout", "--force", instance["base_commit"]],
-        cwd=dest, check=True, env=env,
-    )
+
+    if not (dest / ".git").exists():
+        fresh_clone()
+    checkout = ["git", "checkout", "--force", instance["base_commit"]]
+    if subprocess.run(checkout, cwd=dest, env=env, capture_output=True).returncode != 0:
+        # A clone left half-finished on this node (a cancelled job) cannot check out; start over once.
+        fresh_clone()
+        subprocess.run(checkout, cwd=dest, check=True, env=env)
     # A reused checkout keeps files the previous designer created; checkout
     # --force restores tracked files only. Build artifacts are ignored files
     # and stay (no -x), so the editable install keeps working.

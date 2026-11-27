@@ -260,3 +260,16 @@ class TruncatedIdTests(unittest.TestCase):
         ids = ["t/test_w.py::test_a[x]", "t/test_w.py::test_b[a:", "t/test_w.py::test_c", "u/test_v.py::k"]
         self.assertEqual(runnable_test_ids(ids),
                          ["t/test_w.py::test_a[x]", "t/test_w.py", "t/test_w.py::test_c", "u/test_v.py::k"])
+
+
+class BrokenCheckoutTests(unittest.TestCase):
+    def test_a_broken_leftover_clone_is_replaced(self):
+        import tempfile
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        commit = origin_repo(root / "origin")
+        dest = root / "work" / "checkout"
+        (dest / ".git").mkdir(parents=True)          # a clone killed before it finished
+        git_clone(instance(root / "origin", commit), dest)
+        self.assertEqual(git(dest, "rev-parse", "HEAD"), commit)
