@@ -156,12 +156,65 @@ def _pytest_nodes(python: str, workspace: Path, tests: list[str], timeout: float
     return HookOutcome("test", "pytest", completed.returncode == 0, output)
 
 
-def make_test_hook(tests: list[str], python: str):
-    """Map every test-kind hook onto ``tests``. Other hooks stay on the runtime allowlist."""
+def test_patch_files(patch: str) -> list[str]:
+    """Paths a unified git diff touches (the ``b/`` side of each ``diff --git``)."""
+    return [line.split(" b/", 1)[1] for line in patch.splitlines()
+            if line.startswith("diff --git ") and " b/" in line]
+
+
+def run_with_test_patch(instance: dict, python: str, workspace: Path, timeout: float) -> HookOutcome:
+    """Run fail_to_pass the way SWE-bench evaluates: the subagent's source with the gold tests.
+
+    The test patch adds or changes the fail_to_pass tests, so they do not exist (or
+    are the old version) in the checkout the subagent sees. For each run: keep the
+    subagent's copies of the patched files, reset them to the base commit, apply the
+    test patch, run the tests, then put the subagent's copies back byte for byte.
+    The subagent never sees the patch in its checkout.
+    """
+    tests = list(instance["fail_to_pass"])
+    patch = instance.get("test_patch")
+    if not patch:
+        return _pytest_nodes(python, workspace, tests, timeout)
+    files = test_patch_files(patch)
+    saved = {name: ((workspace / name).read_bytes() if (workspace / name).is_file() else None)
+             for name in files}
+    base = instance["base_commit"]
+    patch_file = workspace.parent / f".{workspace.name}.test.patch"
+    try:
+        for name in files:
+            exists = subprocess.run(["git", "cat-file", "-e", f"{base}:{name}"], cwd=workspace,
+                                    capture_output=True, check=False).returncode == 0
+            if exists:
+                subprocess.run(["git", "checkout", base, "--", name], cwd=workspace,
+                               capture_output=True, check=True)
+            elif (workspace / name).exists():
+                (workspace / name).unlink()
+        patch_file.write_text(patch, encoding="utf-8")
+        applied = subprocess.run(["git", "apply", "--whitespace=nowarn", str(patch_file)], cwd=workspace,
+                                 capture_output=True, text=True, check=False)
+        if applied.returncode != 0:
+            return HookOutcome("test", "pytest", False, "test patch did not apply: " + applied.stderr[-1000:])
+        return _pytest_nodes(python, workspace, tests, timeout)
+    finally:
+        for name, data in saved.items():
+            target = workspace / name
+            if data is None:
+                if target.exists():
+                    target.unlink()
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
+        # Leave the index as the checkout had it: no staged test-patch changes.
+        subprocess.run(["git", "reset", "-q", "--", *files], cwd=workspace, capture_output=True, check=False)
+        patch_file.unlink(missing_ok=True)
+
+
+def make_test_hook(instance: dict, python: str):
+    """Map every test-kind hook onto the instance's fail_to_pass run. Other hooks stay on the allowlist."""
 
     def hook(spec_hook: dict, workspace: Path, include: list[str], timeout: float) -> HookOutcome:
         if spec_hook.get("kind") == "test" and spec_hook.get("command") in {"pytest", "unittest"}:
-            return _pytest_nodes(python, workspace, tests, timeout)
+            return run_with_test_patch(instance, python, workspace, timeout)
         return run_hook(spec_hook, workspace, include, timeout)
 
     return hook
@@ -250,12 +303,12 @@ def attempt(instance: dict, designer: str, seed: int, client, pin: dict, workdir
             "design": result, "not_executable": {"reason": error.reason, "detail": error.detail},
         }
 
-    hook = make_test_hook(list(instance["fail_to_pass"]), python)
+    hook = make_test_hook(instance, python)
     outcome = run_subagent(
         spec, card, workspace, seed, GeneratedTokenBudget(client), clock=SystemClock(),
         hook_runner=hook,
-        resolved_check=lambda _workspace: _pytest_nodes(
-            python, workspace, list(instance["fail_to_pass"]), FINAL_TEST_TIMEOUT,
+        resolved_check=lambda _workspace: run_with_test_patch(
+            instance, python, workspace, FINAL_TEST_TIMEOUT,
         ).passed,
     )
     trace = outcome["trace"]

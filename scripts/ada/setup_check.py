@@ -1,9 +1,10 @@
 """Check one SWE-bench instance's environment without the model.
 
 Clones at the base commit and installs exactly as ``harnessspec.swebench`` does,
-then runs the instance's fail_to_pass tests once. At the base commit they should
-be collected and fail (pytest exit 1). Exit 4 or 5 means the node ids do not
-resolve or the environment cannot run them.
+then runs the instance's fail_to_pass tests once with SWE-bench's test patch, the
+same way the runner's hook does. At the base commit they should be collected and
+fail. "not found" or "no tests ran" means the ids do not resolve or the
+environment cannot run them; passing means the tests cannot tell a fix apart.
 
     python scripts/ada/setup_check.py INSTANCE_ID WORKDIR OUT_DIR
 """
@@ -19,7 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "src"))
 
-from harnessspec.swebench import SetupError, prepare_workspace  # noqa: E402
+from harnessspec.swebench import SetupError, prepare_workspace, run_with_test_patch  # noqa: E402
 
 
 def main() -> int:
@@ -39,15 +40,13 @@ def main() -> int:
     report["setup_s"] = round(time.monotonic() - started, 1)
     if workspace is not None:
         t0 = time.monotonic()
-        completed = subprocess.run(
-            [python, "-m", "pytest", "-q", "--tb=no", "-p", "no:cacheprovider", *instance["fail_to_pass"]],
-            cwd=workspace, capture_output=True, text=True, timeout=900, check=False,
-        )
-        tail = (completed.stdout + completed.stderr).strip().splitlines()[-6:]
+        outcome = run_with_test_patch(instance, python, workspace, 900)
+        text = outcome.output or ""
+        broken = any(marker in text for marker in ("not found", "no tests ran", "did not apply", "ERROR collecting"))
         report.update(
-            tests_exit=completed.returncode,
-            tests_ok=completed.returncode == 1,  # collected and failing at the base commit
-            tests_tail=tail,
+            tests_passed=outcome.passed,
+            tests_ok=(not outcome.passed) and not broken and "failed" in text,
+            tests_tail=text.strip().splitlines()[-6:],
             tests_s=round(time.monotonic() - t0, 1),
         )
     (out_dir / f"{instance_id}.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

@@ -145,13 +145,54 @@ class SwebenchRunnerTests(unittest.TestCase):
 
             return Completed()
 
-        hook = make_test_hook(["tests/test_app.py::test_add"], sys.executable)
+        hook = make_test_hook({"fail_to_pass": ["tests/test_app.py::test_add"]}, sys.executable)
         with mock.patch("harnessspec.swebench.subprocess.run", fake_run):
             outcome = hook({"kind": "test", "command": "unittest"}, Path("."), ["."], 5)
         self.assertFalse(outcome.passed)
         self.assertFalse(captured["shell"])
         self.assertEqual(captured["argv"][1:4], ["-m", "pytest", "-q"])
         self.assertIn("tests/test_app.py::test_add", captured["argv"])
+
+    def test_test_patch_is_applied_for_the_run_and_hidden_after(self):
+        import tempfile
+        from harnessspec import swebench
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        origin = root / "origin"
+        commit = origin_repo(origin)
+        (origin / "tests").mkdir()
+        (origin / "tests" / "test_app.py").write_text("def test_old():\n    pass\n", encoding="utf-8")
+        git(origin, "add", "tests/test_app.py")
+        git(origin, "commit", "-m", "tests")
+        commit = git(origin, "rev-parse", "HEAD")
+        checkout = root / "work" / "checkout"
+        git_clone(instance(origin, commit), checkout)
+        patch = (
+            "diff --git a/tests/test_app.py b/tests/test_app.py\n"
+            "--- a/tests/test_app.py\n+++ b/tests/test_app.py\n"
+            "@@ -1,2 +1,4 @@\n def test_old():\n     pass\n+def test_add():\n+    pass\n"
+        )
+        # The subagent edited the test file and the source.
+        (checkout / "tests" / "test_app.py").write_text("# agent edit\n", encoding="utf-8")
+        (checkout / "README.md").write_text("fixed\n", encoding="utf-8")
+        seen = {}
+
+        def fake_pytest(python, workspace, tests, timeout):
+            seen["test_file"] = (workspace / "tests" / "test_app.py").read_text(encoding="utf-8")
+            seen["readme"] = (workspace / "README.md").read_text(encoding="utf-8")
+            return HookOutcome("test", "pytest", True, "1 passed")
+
+        row = instance(origin, commit, test_patch=patch)
+        with mock.patch.object(swebench, "_pytest_nodes", fake_pytest):
+            outcome = swebench.run_with_test_patch(row, sys.executable, checkout, 5)
+        self.assertTrue(outcome.passed)
+        self.assertIn("def test_add", seen["test_file"])         # gold test present for the run
+        self.assertNotIn("agent edit", seen["test_file"])       # on the base version, not the agent's
+        self.assertEqual(seen["readme"], "fixed\n")            # with the agent's source change
+        self.assertEqual((checkout / "tests" / "test_app.py").read_text(encoding="utf-8"), "# agent edit\n")
+        self.assertEqual(git(checkout, "diff", "--cached", "--name-only"), "")
+        self.assertFalse(list(checkout.parent.glob("*.test.patch")))
 
     def test_attempt_writes_a_valid_row_and_resume_skips_it(self):
         import tempfile
