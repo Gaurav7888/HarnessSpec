@@ -1,0 +1,38 @@
+[
+  {
+    "benchmark": "swebench",
+    "budget_violations": 0,
+    "design_tokens": 0,
+    "designer": "A",
+    "first_pass_valid": true,
+    "hook_failures": 0,
+    "model": "qwen2.5-coder:7b",
+    "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+    "resolved": false,
+    "rounds": 0,
+    "seed": 1,
+    "silent_handoff": false,
+    "subagent_tokens": 258459,
+    "task_id": "pallets__flask-5014",
+    "tool_denials": 6,
+    "wall_clock_s": 191.51
+  },
+  {
+    "benchmark": "swebench",
+    "budget_violations": 0,
+    "design_tokens": 1552,
+    "designer": "D",
+    "first_pass_valid": false,
+    "hook_failures": 0,
+    "model": "qwen2.5-coder:7b",
+    "model_digest": "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+    "resolved": false,
+    "rounds": 1,
+    "seed": 1,
+    "silent_handoff": false,
+    "subagent_tokens": 45930,
+    "task_id": "pallets__flask-5014",
+    "tool_denials": 30,
+    "wall_clock_s": 24.854
+  }
+]

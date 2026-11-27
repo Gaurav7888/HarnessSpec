@@ -92,16 +92,57 @@ def action_from_reply(content: str, tokens: int, seconds: float) -> Action:
     )
 
 
-def opening_prompt(spec: dict) -> str:
+def _example_paths(spec: dict, workspace=None) -> tuple[str, str]:
+    """A directory and a file to show in examples, from the spec's own grants.
+
+    Real paths when the workspace shows them, placeholders otherwise. Never the
+    fixture's paths: a repository the subagent cannot see would mislead it.
+    """
+    include = list(spec.get("context", {}).get("include") or ["."])
+    folder = include[0]
+    if workspace is not None:
+        from pathlib import Path
+
+        root = Path(workspace)
+        for item in include:
+            if (root / item).is_file():
+                return folder if (root / folder).is_dir() else ".", item
+    return folder, f"<a file under {folder}>"
+
+
+def action_shapes(spec: dict, workspace=None) -> list[str]:
+    folder, file = _example_paths(spec, workspace)
+    names = {tool["name"] for tool in spec["tools"]}
+    shapes = []
+    if "list_dir" in names:
+        shapes.append(f'List: {{"kind":"tool","tool":"list_dir","permission":"read","path":"{folder}"}}')
+    if "read_file" in names:
+        shapes.append(f'Read: {{"kind":"tool","tool":"read_file","permission":"read","path":"{file}"}}')
+        shapes.append(f'Read lines: {{"kind":"tool","tool":"read_file","permission":"read","path":"{file}",'
+                      '"start_line":1,"end_line":200}')
+    if "write_file" in names:
+        shapes.append(f'Write the whole file: {{"kind":"tool","tool":"write_file","permission":"write",'
+                      f'"path":"{file}","content":"<the complete new file>"}}')
+    shapes.append(f'Return: {{"kind":"return","summary":"...","citations":[{{"file":"{file}","line":1}}],'
+                  '"test_output":"...","claims":[]}')
+    return shapes
+
+
+def opening_prompt(spec: dict, workspace=None) -> str:
     tools = [
         f"- {tool['name']} permission {tool['permission']} paths {list(tool['paths'])}"
         for tool in spec["tools"]
     ]
     contract = spec["return_contract"]
     budgets = spec["budgets"]
+    can_write = any(tool["permission"] == "write" for tool in spec["tools"])
+    job = ("Your job: make the change the goal asks for by editing files with write_file, then return."
+           if can_write else "Your job: answer from the files you may read, then return.")
     return "\n".join(
         [
             f"Goal: {spec['goal']['statement']}",
+            job,
+            "Paths are relative to the repository root.",
             "Tools you may call:",
             *tools,
             (
@@ -114,11 +155,22 @@ def opening_prompt(spec: dict) -> str:
                 f"test output required={str(contract['require_test_output']).lower()}, "
                 f"min citations={contract['min_citations']}."
             ),
-            'Read: {"kind":"tool","tool":"read_file","permission":"read","path":"src/app.py"}',
-            'Write the whole file: {"kind":"tool","tool":"write_file","permission":"write","path":"src/app.py","content":"..."}',
-            'Return: {"kind":"return","summary":"...","citations":[{"file":"src/app.py","line":2}],"test_output":"...","claims":[]}',
+            'Each reply is one JSON object. "kind" is "tool" or "return"; a tool\'s name goes in "tool".',
+            "A read returns at most 12000 characters; read long files in ranges of up to 200 lines.",
+            "write_file replaces the whole file, so send its complete new content.",
+            *action_shapes(spec, workspace),
         ]
     )
+
+
+def unparsed_hint(reply: str, spec: dict, workspace=None) -> str:
+    """Say what was wrong with a reply the harness could not use, and the shapes it accepts."""
+    data = _load_object(reply)
+    if data is None:
+        got = "the reply was not one JSON object"
+    else:
+        got = f'"kind" was {json.dumps(data.get("kind"))}'
+    return "\n".join([f"Not an action: {got}. Use one of:", *action_shapes(spec, workspace)])
 
 
 def workspace_passes(workspace) -> bool:
@@ -143,7 +195,7 @@ def run_subagent(
     wall_clock = isinstance(session.clock, SystemClock)
     messages = [
         {"role": "system", "content": SYSTEM},
-        {"role": "user", "content": opening_prompt(spec)},
+        {"role": "user", "content": opening_prompt(spec, workspace)},
     ]
     log = []
     started = time.monotonic()
@@ -168,7 +220,10 @@ def run_subagent(
             }
         )
         messages.append({"role": "assistant", "content": reply.content})
-        messages.append({"role": "user", "content": observation.for_model()})
+        feedback = observation.for_model()
+        if action.kind == "unparsed":
+            feedback += "\n" + unparsed_hint(reply.content, spec, workspace)
+        messages.append({"role": "user", "content": feedback})
     return {
         "trace": session.trace,
         "log": log,

@@ -90,6 +90,39 @@ class SwebenchRunnerTests(unittest.TestCase):
         self.assertEqual((checkout / "ready").read_text(encoding="utf-8"), "yes")
         self.assertTrue(python.endswith("/bin/python"))
 
+    def test_reused_checkout_drops_files_the_previous_designer_left(self):
+        import tempfile
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        commit = origin_repo(root / "origin")
+        inst = instance(root / "origin", commit)
+        dest = root / "work" / "checkout"
+        git_clone(inst, dest)
+        (dest / "README.md").write_text("edited by A\n", encoding="utf-8")
+        (dest / "new_by_a.py").write_text("x = 1\n", encoding="utf-8")
+        git_clone(inst, dest)
+        self.assertEqual((dest / "README.md").read_text(encoding="utf-8"), "bug\n")
+        self.assertFalse((dest / "new_by_a.py").exists())
+
+    def test_setup_failure_writes_no_row_and_is_retried(self):
+        import tempfile
+        from harnessspec.swebench import SetupError
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+
+        def broken(_instance, _workdir):
+            raise SetupError("pip exploded")
+
+        inst = {"instance_id": "x__y-1", "problem_statement": "p", "fail_to_pass": ["t::a"]}
+        out, traces = root / "rows.json", root / "traces"
+        rows = run_plan([inst], ["A"], [1], root / "work", out, traces, {"name": "m", "digest": "d"},
+                        lambda: None, prepare=broken)
+        self.assertEqual(rows, [])
+        self.assertFalse(out.exists())
+        self.assertTrue((traces / "x__y-1__A__seed1__setup_failed.json").exists())
+
     def test_install_records_a_failing_command(self):
         import tempfile
         from harnessspec.swebench import SetupError
@@ -112,13 +145,54 @@ class SwebenchRunnerTests(unittest.TestCase):
 
             return Completed()
 
-        hook = make_test_hook(["tests/test_app.py::test_add"], sys.executable)
+        hook = make_test_hook({"fail_to_pass": ["tests/test_app.py::test_add"]}, sys.executable)
         with mock.patch("harnessspec.swebench.subprocess.run", fake_run):
             outcome = hook({"kind": "test", "command": "unittest"}, Path("."), ["."], 5)
         self.assertFalse(outcome.passed)
         self.assertFalse(captured["shell"])
         self.assertEqual(captured["argv"][1:4], ["-m", "pytest", "-q"])
         self.assertIn("tests/test_app.py::test_add", captured["argv"])
+
+    def test_test_patch_is_applied_for_the_run_and_hidden_after(self):
+        import tempfile
+        from harnessspec import swebench
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        origin = root / "origin"
+        commit = origin_repo(origin)
+        (origin / "tests").mkdir()
+        (origin / "tests" / "test_app.py").write_text("def test_old():\n    pass\n", encoding="utf-8")
+        git(origin, "add", "tests/test_app.py")
+        git(origin, "commit", "-m", "tests")
+        commit = git(origin, "rev-parse", "HEAD")
+        checkout = root / "work" / "checkout"
+        git_clone(instance(origin, commit), checkout)
+        patch = (
+            "diff --git a/tests/test_app.py b/tests/test_app.py\n"
+            "--- a/tests/test_app.py\n+++ b/tests/test_app.py\n"
+            "@@ -1,2 +1,4 @@\n def test_old():\n     pass\n+def test_add():\n+    pass\n"
+        )
+        # The subagent edited the test file and the source.
+        (checkout / "tests" / "test_app.py").write_text("# agent edit\n", encoding="utf-8")
+        (checkout / "README.md").write_text("fixed\n", encoding="utf-8")
+        seen = {}
+
+        def fake_pytest(python, workspace, tests, timeout):
+            seen["test_file"] = (workspace / "tests" / "test_app.py").read_text(encoding="utf-8")
+            seen["readme"] = (workspace / "README.md").read_text(encoding="utf-8")
+            return HookOutcome("test", "pytest", True, "1 passed")
+
+        row = instance(origin, commit, test_patch=patch)
+        with mock.patch.object(swebench, "_pytest_nodes", fake_pytest):
+            outcome = swebench.run_with_test_patch(row, sys.executable, checkout, 5)
+        self.assertTrue(outcome.passed)
+        self.assertIn("def test_add", seen["test_file"])         # gold test present for the run
+        self.assertNotIn("agent edit", seen["test_file"])       # on the base version, not the agent's
+        self.assertEqual(seen["readme"], "fixed\n")            # with the agent's source change
+        self.assertEqual((checkout / "tests" / "test_app.py").read_text(encoding="utf-8"), "# agent edit\n")
+        self.assertEqual(git(checkout, "diff", "--cached", "--name-only"), "")
+        self.assertFalse(list(checkout.parent.glob("*.test.patch")))
 
     def test_attempt_writes_a_valid_row_and_resume_skips_it(self):
         import tempfile
@@ -178,3 +252,87 @@ class SwebenchRunnerTests(unittest.TestCase):
         self.assertGreater(written["design_tokens"], 0)
         self.assertIn("not_executable", record)
         self.assertFalse((workspace / "src").exists())
+
+
+class TruncatedIdTests(unittest.TestCase):
+    def test_truncated_parametrized_id_runs_its_file(self):
+        from harnessspec.swebench import runnable_test_ids
+        ids = ["t/test_w.py::test_a[x]", "t/test_w.py::test_b[a:", "t/test_w.py::test_c", "u/test_v.py::k"]
+        self.assertEqual(runnable_test_ids(ids),
+                         ["t/test_w.py::test_a[x]", "t/test_w.py", "t/test_w.py::test_c", "u/test_v.py::k"])
+
+
+class BrokenCheckoutTests(unittest.TestCase):
+    def test_a_broken_leftover_clone_is_replaced(self):
+        import tempfile
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        commit = origin_repo(root / "origin")
+        dest = root / "work" / "checkout"
+        (dest / ".git").mkdir(parents=True)          # a clone killed before it finished
+        git_clone(instance(root / "origin", commit), dest)
+        self.assertEqual(git(dest, "rev-parse", "HEAD"), commit)
+
+
+class RepoSummaryTests(unittest.TestCase):
+    def test_summary_lists_tracked_paths_to_depth_two(self):
+        import tempfile
+        from harnessspec.swebench import repo_summary
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name) / "repo"
+        origin_repo(root)
+        (root / "pkg" / "sub").mkdir(parents=True)
+        (root / "pkg" / "core.py").write_text("x = 1\n", encoding="utf-8")
+        (root / "pkg" / "sub" / "deep.py").write_text("y = 2\n", encoding="utf-8")
+        (root / "untracked.py").write_text("z = 3\n", encoding="utf-8")
+        git(root, "add", "pkg")
+        git(root, "commit", "-m", "pkg")
+        lines = repo_summary(root).splitlines()
+        self.assertEqual(lines, ["README.md", "pkg/core.py", "pkg/sub/"])
+
+    def test_design_prompt_shows_summary_only_when_given(self):
+        from harnessspec.orchestrator import spec_messages, tuple_messages
+        task = {"task_id": "t", "statement": "Fix it."}
+        card = swebench_card()
+        plain = spec_messages(task, card, "m")[-1]["content"]
+        self.assertNotIn("Repository layout", plain)
+        with_summary = dict(task, repo_summary="requests/\nsetup.py")
+        self.assertIn("Repository layout (paths that exist):\nrequests/\nsetup.py",
+                      spec_messages(with_summary, card, "m")[-1]["content"])
+        self.assertIn("requests/", tuple_messages(with_summary, card, "m")[-1]["content"])
+
+
+class ModelErrorTests(unittest.TestCase):
+    def test_hung_model_call_writes_no_row(self):
+        import tempfile
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        workspace = root / "checkout"
+        (workspace / "src").mkdir(parents=True)
+
+        class Hung:
+            def chat(self, messages, seed, json_mode=False):
+                raise TimeoutError("timed out")
+
+        inst = {"instance_id": "x__y-2", "problem_statement": "p", "fail_to_pass": ["t::a"]}
+        out, traces = root / "rows.json", root / "traces"
+        rows = run_plan([inst], ["D"], [1], root / "work", out, traces, {"name": "m", "digest": "d"},
+                        lambda: Hung(), prepare=lambda _i, _w: (workspace, sys.executable))
+        self.assertEqual(rows, [])
+        self.assertTrue((traces / "x__y-2__D__seed1__model_error.json").exists())
+
+    def test_reply_cap_reaches_ollama_only_when_set(self):
+        from harnessspec.llm import OllamaClient, load_pin
+        sent = []
+        with mock.patch.object(OllamaClient, "_post", lambda self, path, body=None: (
+                sent.append(body) or {"models": [{"name": load_pin()["name"], "digest": load_pin()["digest"]}],
+                                      "message": {"content": "{}"}})):
+            client = OllamaClient(load_pin())
+            client.chat([{"role": "user", "content": "x"}], seed=1)
+            client.max_output_tokens = 8000
+            client.chat([{"role": "user", "content": "x"}], seed=1)
+        self.assertNotIn("num_predict", sent[-2]["options"])
+        self.assertEqual(sent[-1]["options"]["num_predict"], 8000)

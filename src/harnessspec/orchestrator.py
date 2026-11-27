@@ -93,11 +93,16 @@ def _design_role(task: dict) -> str:
 
 
 def _task_block(task: dict, card: CapabilityCard) -> str:
-    return (
+    block = (
         f"Task id: {task['task_id']}\n"
         f"Task:\n{task['statement'].strip()}\n\n"
         f"Parent capability card (the most you may grant):\n{json.dumps(card.to_dict())}"
     )
+    # The registered design input includes a repository summary. It is shown only
+    # when the caller supplies one, so every existing prompt (H3, SWE-QA) is unchanged.
+    if task.get("repo_summary"):
+        block += f"\n\nRepository layout (paths that exist):\n{task['repo_summary'].strip()}"
+    return block
 
 
 SYSTEM_D = (

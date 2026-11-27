@@ -208,3 +208,23 @@ The final replay matched the committed aggregate byte for byte. All 114 tests pa
 - Tool: Cursor, Grok 4.7.
 - Task: Gaurav's unattended SWE-bench runner for the Ada job. `pilot/run_swebench.py` clones each instance, installs the SWE-bench v2.1.0 commands, calls `design()` and `executable_spec()`, and writes resumable rows. Test hooks run the instance's `fail_to_pass` ids. No SWE-bench model call was made. None of the ten instances has been installed or had its tests run.
 - Check: `PYTHONPATH=src python3 -m unittest discover -s tests -q` (120 tests).
+
+## 2026-11-26/27 (SWE-bench on Ada)
+
+- Tool: Claude Code (Claude Opus 5.5), for Affan. The runner is Gaurav's (`pilot/run_swebench.py`, `src/harnessspec/swebench.py`); this session fixed it and ran it.
+- Environment:
+  - **Ollama:** 0.32.15, the conda-forge CUDA 12.9 build, on one RTX 2080 Ti per instance. The pinned 0.40.14's CUDA 13 libraries need a newer driver than Ada's 580, and GitHub release downloads do not reach Ada.
+  - **Digest:** Ollama 0.32 reports the manifest SHA-256 (`4aaba1ee…`). Its config layer is the pinned `dae161e2…`, and the manifests are byte-identical on the pinning Mac and on Ada. `llm.py` accepts exactly that equivalent.
+  - **Python:** conda-forge Pythons 3.6–3.11, in `~/.conda/envs` on Ada.
+- Changes made after looking at output, in order. None was tuned on v1 or v2 results.
+  - **v0 (discarded, kept in `pilot/swebench_v0/`):** the shared subagent prompt showed the fixture's `src/app.py` in every example. D repeated an invalid action 30 times; A returned prose without editing.
+    - **Prompt change:** examples now come from the spec's own grants, the prompt states the job, and a malformed action gets the accepted shapes back. It is still refused and still counted.
+  - **Runner fixes:**
+    - SWE-bench Verified `test_patch` applied only while tests run, hidden from the subagent. Without it, FAIL_TO_PASS tests were "not found" or the old version.
+    - SWE-bench 2.1.0 pre-installs: astropy setuptools pin; flask and pylint requirements files; scikit-learn pip 21.3.1, pytest and `cython<3`.
+    - `git clean -fd` between designers, and a re-clone when a partial checkout cannot check out.
+    - Setup failures and model timeouts write no row.
+    - Each reply capped at the 8,000-token budget. The largest recorded reply is 2,001 tokens.
+  - **v2 (labelled extension):** the registered repository summary as an optional design input (`--repo-summary`). Without it, prompts are byte-identical.
+- Check: 135 tests pass. A CPU-only setup check confirmed that every instance installs and that its fail-to-pass tests are collected and fail at the base commit. A fixture smoke test on the GPU resolved A and D. All 40 rows validate with `read_results`.
+- Model invoked: `qwen2.5-coder:7b` at the pinned digest, temperature 0.2, `num_ctx` 16384, seed 1. v1 and v2 each ran A and D on ten instances. Results are in `docs/SWEBENCH.md`.

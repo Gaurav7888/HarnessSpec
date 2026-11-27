@@ -22,7 +22,7 @@ from pathlib import Path
 
 from harnessspec.llm import OllamaClient, load_pin
 from harnessspec.results import check_output_path
-from harnessspec.swebench import run_plan
+from harnessspec.swebench import MAX_TOKENS, run_plan
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTANCES = ROOT / "pilot" / "swebench_instances.json"
@@ -50,6 +50,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--ollama-host", default="http://127.0.0.1:11434")
     parser.add_argument("--instances-file", type=Path, default=INSTANCES)
+    parser.add_argument("--repo-summary", action="store_true",
+                        help="v2: give the designer the registered repository summary (depth-2 tracked paths)")
     args = parser.parse_args(argv)
     for designer in args.designers:
         if designer not in {"A", "B", "C", "D"}:
@@ -62,7 +64,12 @@ def main(argv: list[str] | None = None) -> None:
 
     def client_factory():
         if created["client"] is None:
-            created["client"] = OllamaClient(pin, host=args.ollama_host)
+            client = OllamaClient(pin, host=args.ollama_host)
+            # A reply longer than the run's whole generated-token budget can never be
+            # admitted; capping it stops a looping generation from hanging the job.
+            # The largest reply in every recorded run is 2,001 tokens, so this changes none.
+            client.max_output_tokens = MAX_TOKENS
+            created["client"] = client
         return created["client"]
 
     rows = run_plan(
@@ -74,6 +81,7 @@ def main(argv: list[str] | None = None) -> None:
         trace_dir,
         pin,
         client_factory,
+        with_repo_summary=args.repo_summary,
     )
     print(json.dumps({"rows": len(rows), "output": str(args.output)}, indent=2))
 
