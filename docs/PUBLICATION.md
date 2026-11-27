@@ -10,14 +10,51 @@ Only A produced accepted answers. Someone who has read the public aggregate resu
 
 ~~~bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
-sha256sum --ignore-missing -c pilot/snapshots/sweqa-ad-seed1-v1/SHA256SUMS
+historical=$(mktemp -d)
+git archive 25e094471905fb54cc55ad8cfbc4456598e4376b | tar -x -C "$historical"
+(cd "$historical" && sha256sum --ignore-missing -c pilot/snapshots/sweqa-ad-seed1-v1/SHA256SUMS)
 git clone https://github.com/peng-weihan/SWE-QA-Bench.git /tmp/sweqa-official
 PYTHONPATH=src python3 pilot/select_sweqa.py /tmp/sweqa-official --output pilot/tmp/rebuilt-manifest.json
 cmp pilot/sweqa_instances.json pilot/tmp/rebuilt-manifest.json
 PYTHONPATH=src python3 pilot/run_sweqa.py --dry-run --verify-sources
 ~~~
 
-The checksum command verifies only files present in the public checkout. Verifying all 54 or replaying the historical audit requires the private bundle. No reviewer should receive that bundle during blinded grading.
+The checksum command verifies the 11 published entries at the public release commit. The active SWE-bench manifest subsequently gained installation metadata, so its current bytes differ from the historical digest. Verifying all 54 or replaying the historical audit requires the private bundle. No reviewer should receive that bundle during blinded grading.
+
+## Reproduce the report without inference
+
+The final SWE-QA checkpoint covers 120 attempts. The coordinator can replay its token ledgers, source checks and paired intervals with the private experiment directory and pinned source archives. From the repository root, set `run` to that directory and `cache` to the archive cache. The replay writes only a new aggregate.
+
+~~~bash
+replay_dir=$(mktemp -d)
+PYTHONPATH=src:. python3 -m pilot.sweqa_metrics --trace-dir "$run/traces" \
+  --results "$run/results.json" --energy-dir "$run/energy" --archive-cache "$cache" \
+  --output "$replay_dir/replay.json"
+cmp "$replay_dir/replay.json" pilot/experiments/sweqa-ad-v2/abcd_seed3_metrics.json
+~~~
+
+The SWE-bench evidence is pinned to the reviewed revision of PR #1. Fetch it once, then sum each result file separately with jq. Each line below reports arm, attempts, resolved, design tokens, subagent tokens, total tokens and denials, in that order. [Runner, evaluation details and traces](https://github.com/Gaurav7888/HarnessSpec/blob/f584be43a85ad577b7439172ef1b51f197da80c1/docs/SWEBENCH.md)
+
+~~~bash
+git fetch --no-tags https://github.com/Gaurav7888/HarnessSpec.git refs/pull/1/head
+rev=f584be43a85ad577b7439172ef1b51f197da80c1
+for file in swebench_results.json swebench_results_v2.json; do
+  echo "$file"
+  git show "$rev:pilot/$file" | jq -r 'group_by(.designer)[] |
+    [.[0].designer, length, (map(select(.resolved)) | length),
+     (map(.design_tokens) | add), (map(.subagent_tokens) | add),
+     (map(.design_tokens + .subagent_tokens) | add), (map(.tool_denials) | add)] | @tsv'
+done
+~~~
+
+Build the ACM report from the repository root with Tectonic and inspect the final log and page count. Tectonic uses its cached bundle after the first download.
+
+~~~bash
+build=$(mktemp -d)
+tectonic -b https://data1b.fullyjustified.net/tlextras-2022.0r0.tar \
+  --keep-logs --keep-intermediates --outdir "$build" docs/final_report.tex
+pdfinfo "$build/final_report.pdf"
+~~~
 
 ## Independently rerun the historical treatment
 
