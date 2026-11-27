@@ -217,8 +217,12 @@ def _blank_row(task_id, designer, seed, pin, design_tokens, rounds, first_pass_v
 
 
 def attempt(instance: dict, designer: str, seed: int, client, pin: dict, workdir: Path,
-            prepare=prepare_workspace) -> tuple[dict, dict]:
-    """One designer on one instance. Returns the schema row and the trace record."""
+            prepare=prepare_workspace) -> tuple[dict | None, dict]:
+    """One designer on one instance. Returns the schema row and the trace record.
+
+    The row is None when the checkout or install fails: that is an environment
+    failure, not a result for either designer.
+    """
     started = time.monotonic()
     task_id = instance["instance_id"]
     card = swebench_card()
@@ -226,9 +230,10 @@ def attempt(instance: dict, designer: str, seed: int, client, pin: dict, workdir
         workspace, python = prepare(instance, workdir)
     except (SetupError, subprocess.CalledProcessError, OSError) as error:
         detail = error.stderr.strip() if isinstance(error, subprocess.CalledProcessError) and error.stderr else str(error)
-        wall = time.monotonic() - started
-        row = _blank_row(task_id, designer, seed, pin, 0, 0, False, wall)
-        return row, {"task_id": task_id, "designer": designer, "seed": seed, "setup_error": detail[-2000:]}
+        # No model ran, so this is not a designer outcome. Return no row: the
+        # failure is logged and a later run retries the instance.
+        return None, {"task_id": task_id, "designer": designer, "seed": seed,
+                      "setup_error": detail[-2000:], "wall_clock_s": round(time.monotonic() - started, 3)}
 
     task = {"task_id": task_id, "statement": instance["problem_statement"]}
     result = design(task, card, designer, seed, client=client)
@@ -299,6 +304,11 @@ def run_plan(instances: list[dict], designers: list[str], seeds: list[int], work
                 if client is None:
                     client = client_factory()
                 row, record = attempt(instance, designer, seed, client, pin, workdir, prepare=prepare)
+                if row is None:
+                    name = f"{instance['instance_id']}__{designer}__seed{seed}__setup_failed.json"
+                    write_json(trace_dir / name, record)
+                    print(f"setup failed: {instance['instance_id']} {designer} seed {seed}", flush=True)
+                    continue
                 rows.append(row)
                 done.add(result_key(row))
                 write_json(output, rows)

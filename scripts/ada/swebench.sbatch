@@ -6,14 +6,19 @@
 #SBATCH --gres=gpu:1
 #SBATCH -c 10
 #SBATCH --mem-per-cpu=2G
-#SBATCH --time=04:00:00
+#SBATCH --time=02:00:00
+#SBATCH --array=0-9%4
 #SBATCH --job-name=hs-swebench
-#SBATCH --output=logs/%x-%j.out
+#SBATCH --output=logs/%x-%A_%a.out
 
-# SWE-bench A/D on Ada with the pinned model on one 2080 Ti.
-#   INSTANCES="astropy__astropy-12907" DESIGNERS="A D" SEEDS="1" sbatch scripts/ada/swebench.sbatch
-# Leave INSTANCES empty for all ten. Rows are resumable: a resubmitted job skips
-# finished ones. Checkouts and venvs live on the node's /ssd_scratch.
+# SWE-bench on Ada with the pinned model: one array task per instance, one 2080 Ti
+# each, at most 4 at once (the QoS GPU limit).
+#   sbatch scripts/ada/swebench.sbatch                       # all ten, A and D, seed 1
+#   DESIGNERS="B C" SEEDS="1 2 3" sbatch --array=0,4 scripts/ada/swebench.sbatch
+# Each instance writes pilot/swebench/<instance>.json (and _traces/), so tasks never
+# share a file; scripts/ada/merge_swebench.py builds pilot/swebench_results.json.
+# Rows are resumable: a resubmitted task skips finished ones. A setup failure
+# writes no row. Checkouts and venvs live on the node's /ssd_scratch.
 
 set -euo pipefail
 cd ~/code/HarnessSpec
@@ -31,17 +36,17 @@ export PATH=$PYBIN:$PATH
 WORK=/ssd_scratch/$USER/swebench
 mkdir -p "$WORK"
 export PIP_CACHE_DIR=/ssd_scratch/$USER/pip-cache PIP_DISABLE_PIP_VERSION_CHECK=1
-RUN=~/runs/hs-swebench-$SLURM_JOB_ID
+ID=$($PY -c "import json,sys; print(json.load(open('pilot/swebench_instances.json'))['instances'][int(sys.argv[1])]['instance_id'])" "$SLURM_ARRAY_TASK_ID")
+RUN=~/runs/hs-swebench-${SLURM_ARRAY_JOB_ID}_$SLURM_ARRAY_TASK_ID
 mkdir -p "$RUN"
 
-echo "job=$SLURM_JOB_ID node=$(hostname) start=$(date -Is) commit=$(git rev-parse --short HEAD)"
+echo "job=$SLURM_JOB_ID instance=$ID node=$(hostname) start=$(date -Is) commit=$(git rev-parse --short HEAD)"
 nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv,noheader
 source scripts/ada/ollama_job.sh
 start_ollama "$RUN/ollama.log"
 ensure_model qwen2.5-coder:7b
 
-ARGS=(--designers ${DESIGNERS:-A D} --seeds ${SEEDS:-1} --workdir "$WORK"
-      --output pilot/swebench_results.json --ollama-host "$OLLAMA_HOST_URL")
-if [ -n "${INSTANCES:-}" ]; then ARGS+=(--instances $INSTANCES); fi
-$PY pilot/run_swebench.py "${ARGS[@]}"
+mkdir -p pilot/swebench
+$PY pilot/run_swebench.py --designers ${DESIGNERS:-A D} --seeds ${SEEDS:-1} --instances "$ID" \
+    --workdir "$WORK" --output "pilot/swebench/$ID.json" --ollama-host "$OLLAMA_HOST_URL"
 echo "end=$(date -Is)"

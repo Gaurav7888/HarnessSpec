@@ -105,6 +105,24 @@ class SwebenchRunnerTests(unittest.TestCase):
         self.assertEqual((dest / "README.md").read_text(encoding="utf-8"), "bug\n")
         self.assertFalse((dest / "new_by_a.py").exists())
 
+    def test_setup_failure_writes_no_row_and_is_retried(self):
+        import tempfile
+        from harnessspec.swebench import SetupError
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+
+        def broken(_instance, _workdir):
+            raise SetupError("pip exploded")
+
+        inst = {"instance_id": "x__y-1", "problem_statement": "p", "fail_to_pass": ["t::a"]}
+        out, traces = root / "rows.json", root / "traces"
+        rows = run_plan([inst], ["A"], [1], root / "work", out, traces, {"name": "m", "digest": "d"},
+                        lambda: None, prepare=broken)
+        self.assertEqual(rows, [])
+        self.assertFalse(out.exists())
+        self.assertTrue((traces / "x__y-1__A__seed1__setup_failed.json").exists())
+
     def test_install_records_a_failing_command(self):
         import tempfile
         from harnessspec.swebench import SetupError
