@@ -42,10 +42,11 @@ def main() -> int:
         t0 = time.monotonic()
         outcome = run_with_test_patch(instance, python, workspace, 900)
         text = outcome.output or ""
-        broken = any(marker in text for marker in ("not found", "no tests ran", "did not apply", "ERROR collecting"))
+        # A collection error at the base commit is a failure, as in SWE-bench (pylint imports what the fix adds).
+        broken = any(marker in text for marker in ("not found", "no tests ran", "did not apply"))
         report.update(
             tests_passed=outcome.passed,
-            tests_ok=(not outcome.passed) and not broken and "failed" in text,
+            tests_ok=(not outcome.passed) and not broken and ("failed" in text or "error" in text),
             tests_tail=text.strip().splitlines()[-6:],
             tests_s=round(time.monotonic() - t0, 1),
         )

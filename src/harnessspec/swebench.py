@@ -162,6 +162,23 @@ def test_patch_files(patch: str) -> list[str]:
             if line.startswith("diff --git ") and " b/" in line]
 
 
+def runnable_test_ids(ids: list[str]) -> list[str]:
+    """Node ids pytest can resolve. A truncated id is replaced by its test file.
+
+    SWE-bench Verified stores some parametrized ids cut at a space
+    (pylint-4551: ``test_get_annotation_annassign[a:``). No checkout has a node
+    with that name, so the file runs instead; SWE-bench's own harness runs
+    whole test files too.
+    """
+    out: list[str] = []
+    for test in ids:
+        name = test.split("::", 1)[1] if "::" in test else ""
+        target = test.split("::", 1)[0] if name.count("[") != name.count("]") else test
+        if target not in out:
+            out.append(target)
+    return out
+
+
 def run_with_test_patch(instance: dict, python: str, workspace: Path, timeout: float) -> HookOutcome:
     """Run fail_to_pass the way SWE-bench evaluates: the subagent's source with the gold tests.
 
@@ -171,7 +188,7 @@ def run_with_test_patch(instance: dict, python: str, workspace: Path, timeout: f
     test patch, run the tests, then put the subagent's copies back byte for byte.
     The subagent never sees the patch in its checkout.
     """
-    tests = list(instance["fail_to_pass"])
+    tests = runnable_test_ids(list(instance["fail_to_pass"]))
     patch = instance.get("test_patch")
     if not patch:
         return _pytest_nodes(python, workspace, tests, timeout)

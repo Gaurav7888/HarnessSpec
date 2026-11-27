@@ -184,3 +184,42 @@ class SubagentLoopTests(unittest.TestCase):
             outcome = run_subagent(spec, parent, Path(directory), 1, client)
         self.assertEqual(len(client.calls), 1)
         self.assertEqual(outcome["trace"].events[-1].code, "budget.exhausted")
+
+
+class PromptShapeTests(unittest.TestCase):
+    """The subagent sees action examples from its own grants, never the fixture's paths."""
+
+    def _spec(self, include, tools):
+        from harnessspec.designers import fixed_generic_harness
+        from harnessspec.parent import CapabilityCard, ToolGrant
+        card = CapabilityCard(tools={n: ToolGrant(p, (".",)) for n, p in tools.items()},
+                              context_paths=(".",), max_steps=30, max_tokens=8000, max_seconds=900,
+                              allowed_tiers=("7-14B",))
+        spec = fixed_generic_harness("t", card, "Fix the bug.")
+        spec["context"]["include"] = include
+        return spec
+
+    def test_examples_use_the_spec_not_the_fixture(self):
+        from harnessspec.subagent import opening_prompt
+        spec = self._spec(["requests"], {"read_file": "read", "list_dir": "read", "write_file": "write"})
+        prompt = opening_prompt(spec)
+        self.assertNotIn("src/app.py", prompt)
+        self.assertIn('"tool":"read_file"', prompt)
+        self.assertIn("<a file under requests>", prompt)
+        self.assertIn("editing files with write_file", prompt)
+
+    def test_real_file_from_the_workspace_is_shown(self):
+        import tempfile
+        from harnessspec.subagent import opening_prompt
+        with tempfile.TemporaryDirectory() as root:
+            Path(root, "models.py").write_text("x = 1\n", encoding="utf-8")
+            spec = self._spec(["models.py"], {"read_file": "read", "write_file": "write"})
+            self.assertIn('"path":"models.py"', opening_prompt(spec, root))
+
+    def test_wrong_kind_gets_the_shapes_back(self):
+        from harnessspec.subagent import unparsed_hint
+        spec = self._spec(["."], {"read_file": "read"})
+        hint = unparsed_hint('{"kind":"read_file","path":"a.py"}', spec)
+        self.assertIn('"kind" was "read_file"', hint)
+        self.assertIn('{"kind":"tool","tool":"read_file"', hint)
+        self.assertIn("not one JSON object", unparsed_hint("hello", spec))

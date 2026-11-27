@@ -252,3 +252,11 @@ class SwebenchRunnerTests(unittest.TestCase):
         self.assertGreater(written["design_tokens"], 0)
         self.assertIn("not_executable", record)
         self.assertFalse((workspace / "src").exists())
+
+
+class TruncatedIdTests(unittest.TestCase):
+    def test_truncated_parametrized_id_runs_its_file(self):
+        from harnessspec.swebench import runnable_test_ids
+        ids = ["t/test_w.py::test_a[x]", "t/test_w.py::test_b[a:", "t/test_w.py::test_c", "u/test_v.py::k"]
+        self.assertEqual(runnable_test_ids(ids),
+                         ["t/test_w.py::test_a[x]", "t/test_w.py", "t/test_w.py::test_c", "u/test_v.py::k"])
