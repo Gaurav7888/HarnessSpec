@@ -75,6 +75,7 @@
       "version": "2.3",
       "python": "3.11",
       "install_commands": [
+        "python -m pip install -r requirements/dev.txt",
         "python -m pip install click==8.1.3 itsdangerous==2.1.2 Jinja2==3.1.2 MarkupSafe==2.1.1 Werkzeug==2.3.7",
         "python -m pip install -e ."
       ],
@@ -138,6 +139,7 @@
       "version": "2.9",
       "python": "3.9",
       "install_commands": [
+        "python -m pip install -r requirements_test.txt",
         "python -m pip install -e ."
       ],
       "system_setup": [],
@@ -173,7 +175,7 @@
       "python": "3.6",
       "install_commands": [
         "python -m pip install pip==21.3.1",
-        "python -m pip install cython numpy==1.19.2 setuptools scipy==1.5.2",
+        "python -m pip install cython<3 numpy==1.19.2 setuptools scipy==1.5.2",
         "python -m pip install -v --no-use-pep517 --no-build-isolation -e ."
       ],
       "system_setup": [],
@@ -201,5 +203,5 @@
   ],
   "spec_source": "SWE-bench v2.1.0 swebench/harness/constants.py, matched on the dataset version field",
   "environment_note": "No instance has been installed or had its tests run on a machine yet. system_setup is not executed by the runner.",
-  "test_patch_note": "test_patch is SWE-bench Verified's, read from the Hugging Face datasets server on 2026-11-27. The runner applies it only while tests run and restores the subagent's files after, so the subagent never sees it in the checkout. scikit-learn's venv gets pip 21.3.1 first: Python 3.6's bundled pip predates --no-use-pep517."
+  "test_patch_note": "test_patch is SWE-bench Verified's, read from the Hugging Face datasets server on 2026-11-27. The runner applies it only while tests run and restores the subagent's files after, so the subagent never sees it in the checkout. scikit-learn's venv gets pip 21.3.1 first: Python 3.6's bundled pip predates --no-use-pep517. flask and pylint also install the requirements file SWE-bench 2.1.0 names for their repo (requirements/dev.txt, requirements_test.txt), which brings pytest. scikit-learn 0.20 pins cython<3: Cython 3 cannot compile its .pyx files."
 }
