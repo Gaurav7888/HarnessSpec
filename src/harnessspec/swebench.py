@@ -327,43 +327,49 @@ def attempt(instance: dict, designer: str, seed: int, client, pin: dict, workdir
         return None, {"task_id": task_id, "designer": designer, "seed": seed,
                       "setup_error": detail[-2000:], "wall_clock_s": round(time.monotonic() - started, 3)}
 
-    task = {"task_id": task_id, "statement": instance["problem_statement"]}
-    if with_repo_summary:
-        task["repo_summary"] = repo_summary(workspace)
-    result = design(task, card, designer, seed, client=client)
     try:
-        spec = executable_spec(result, task, card)
-    except NotExecutable as error:
+        task = {"task_id": task_id, "statement": instance["problem_statement"]}
+        if with_repo_summary:
+            task["repo_summary"] = repo_summary(workspace)
+        result = design(task, card, designer, seed, client=client)
+        try:
+            spec = executable_spec(result, task, card)
+        except NotExecutable as error:
+            wall = time.monotonic() - started
+            row = _blank_row(
+                task_id, designer, seed, pin, result["design_tokens"], result["rounds"],
+                result["first_pass_valid"], wall,
+            )
+            return row, {
+                "task_id": task_id, "designer": designer, "seed": seed,
+                "design": result, "not_executable": {"reason": error.reason, "detail": error.detail},
+            }
+
+        hook = make_test_hook(instance, python)
+        outcome = run_subagent(
+            spec, card, workspace, seed, GeneratedTokenBudget(client), clock=SystemClock(),
+            hook_runner=hook,
+            resolved_check=lambda _workspace: run_with_test_patch(
+                instance, python, workspace, FINAL_TEST_TIMEOUT,
+            ).passed,
+        )
+        trace = outcome["trace"]
         wall = time.monotonic() - started
-        row = _blank_row(
+        row = schema_row(
             task_id, designer, seed, pin, result["design_tokens"], result["rounds"],
-            result["first_pass_valid"], wall,
+            result["first_pass_valid"], outcome["resolved"], bool(trace.silent_handoff),
+            trace.budget_violations, trace.tool_denials,
+            sum(1 for item in trace.hooks if not item.passed), wall, server_tokens(outcome["log"]),
         )
         return row, {
             "task_id": task_id, "designer": designer, "seed": seed,
-            "design": result, "not_executable": {"reason": error.reason, "detail": error.detail},
+            "design": result, "trace": trace.as_dict(), "log": outcome["log"],
         }
-
-    hook = make_test_hook(instance, python)
-    outcome = run_subagent(
-        spec, card, workspace, seed, GeneratedTokenBudget(client), clock=SystemClock(),
-        hook_runner=hook,
-        resolved_check=lambda _workspace: run_with_test_patch(
-            instance, python, workspace, FINAL_TEST_TIMEOUT,
-        ).passed,
-    )
-    trace = outcome["trace"]
-    wall = time.monotonic() - started
-    row = schema_row(
-        task_id, designer, seed, pin, result["design_tokens"], result["rounds"],
-        result["first_pass_valid"], outcome["resolved"], bool(trace.silent_handoff),
-        trace.budget_violations, trace.tool_denials,
-        sum(1 for item in trace.hooks if not item.passed), wall, server_tokens(outcome["log"]),
-    )
-    return row, {
-        "task_id": task_id, "designer": designer, "seed": seed,
-        "design": result, "trace": trace.as_dict(), "log": outcome["log"],
-    }
+    except (TimeoutError, OSError) as error:
+        # The model server did not answer (a hung or dropped call): an infrastructure
+        # failure, not a designer outcome. No row; a rerun retries it.
+        return None, {"task_id": task_id, "designer": designer, "seed": seed,
+                      "model_error": repr(error)[-500:], "wall_clock_s": round(time.monotonic() - started, 3)}
 
 
 def load_rows(path: Path) -> list[dict]:
@@ -400,9 +406,10 @@ def run_plan(instances: list[dict], designers: list[str], seeds: list[int], work
                 row, record = attempt(instance, designer, seed, client, pin, workdir, prepare=prepare,
                                       with_repo_summary=with_repo_summary)
                 if row is None:
-                    name = f"{instance['instance_id']}__{designer}__seed{seed}__setup_failed.json"
+                    kind = "model_error" if "model_error" in record else "setup_failed"
+                    name = f"{instance['instance_id']}__{designer}__seed{seed}__{kind}.json"
                     write_json(trace_dir / name, record)
-                    print(f"setup failed: {instance['instance_id']} {designer} seed {seed}", flush=True)
+                    print(f"{kind}: {instance['instance_id']} {designer} seed {seed}", flush=True)
                     continue
                 rows.append(row)
                 done.add(result_key(row))

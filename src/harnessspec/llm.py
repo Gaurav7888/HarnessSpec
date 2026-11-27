@@ -60,6 +60,9 @@ class OllamaClient:
         self.digest = self.pin["digest"]
         self.host = host.rstrip("/")
         self.timeout = timeout
+        # Optional cap on one reply's generated tokens (Ollama num_predict). None keeps
+        # Ollama's default, as in every run before SWE-bench.
+        self.max_output_tokens: int | None = None
         if check_digest:
             self.verify_digest()
 
@@ -88,6 +91,8 @@ class OllamaClient:
             "stream": False,
             "options": {**self.pin["options"], "seed": seed},
         }
+        if self.max_output_tokens is not None:
+            body["options"]["num_predict"] = self.max_output_tokens
         if json_mode:
             # Syntax only. A JSON schema here would make the decoder enforce the
             # structure, and the structural errors are what H3 measures.

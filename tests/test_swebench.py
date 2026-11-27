@@ -302,3 +302,37 @@ class RepoSummaryTests(unittest.TestCase):
         self.assertIn("Repository layout (paths that exist):\nrequests/\nsetup.py",
                       spec_messages(with_summary, card, "m")[-1]["content"])
         self.assertIn("requests/", tuple_messages(with_summary, card, "m")[-1]["content"])
+
+
+class ModelErrorTests(unittest.TestCase):
+    def test_hung_model_call_writes_no_row(self):
+        import tempfile
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        workspace = root / "checkout"
+        (workspace / "src").mkdir(parents=True)
+
+        class Hung:
+            def chat(self, messages, seed, json_mode=False):
+                raise TimeoutError("timed out")
+
+        inst = {"instance_id": "x__y-2", "problem_statement": "p", "fail_to_pass": ["t::a"]}
+        out, traces = root / "rows.json", root / "traces"
+        rows = run_plan([inst], ["D"], [1], root / "work", out, traces, {"name": "m", "digest": "d"},
+                        lambda: Hung(), prepare=lambda _i, _w: (workspace, sys.executable))
+        self.assertEqual(rows, [])
+        self.assertTrue((traces / "x__y-2__D__seed1__model_error.json").exists())
+
+    def test_reply_cap_reaches_ollama_only_when_set(self):
+        from harnessspec.llm import OllamaClient, load_pin
+        sent = []
+        with mock.patch.object(OllamaClient, "_post", lambda self, path, body=None: (
+                sent.append(body) or {"models": [{"name": load_pin()["name"], "digest": load_pin()["digest"]}],
+                                      "message": {"content": "{}"}})):
+            client = OllamaClient(load_pin())
+            client.chat([{"role": "user", "content": "x"}], seed=1)
+            client.max_output_tokens = 8000
+            client.chat([{"role": "user", "content": "x"}], seed=1)
+        self.assertNotIn("num_predict", sent[-2]["options"])
+        self.assertEqual(sent[-1]["options"]["num_predict"], 8000)
