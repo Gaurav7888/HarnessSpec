@@ -1,6 +1,6 @@
 # HarnessSpec
 
-**Public review edition.** Candidate materials, run-level records and the frozen tag are held privately while independent grading is pending. For the artifact inventory and public reproduction commands, see the [release notes](docs/PUBLICATION.md).
+**[Official repository](https://github.com/Gaurav7888/HarnessSpec) · Public review edition.** Candidate materials, run-level records and the frozen tag are held privately while independent grading is pending. For the artifact inventory and public reproduction commands, see the [release notes](docs/PUBLICATION.md).
 
 Typed protocol for an orchestrator to design a subagent harness, and a compiler that checks the design before the subagent runs.
 
@@ -23,9 +23,7 @@ The corrected SWE-QA v2 study completed 120 attempts across all four designers a
 
 The historical SWE-QA v1 pilot completed 20 real seed-1 attempts. Ten accepted A answers await independent grading. D had no accepted return. [Historical audit](docs/SWEQA_AUDIT.md) · [SWE-QA v2 experiment and review](docs/SWEQA_V2.md)
 
-## What is not done
-
-The ten SWE-bench Verified instances are listed in `pilot/swebench_instances.json`, with the Python version and install commands from SWE-bench v2.1.0. None of them has been installed or run yet. `pilot/run_swebench.py` clones each repo, installs it, and writes resumable rows. See [SWE-QA pilot and analysis](docs/SWEQA.md) for the pinned question manifest, read-only runner, external grading, shared benchmark records, and energy sidecars. Condition C in `pilot/results.json` is a structural check of a four-field tuple. The model-emitted C is in `pilot/h3_results.json`.
+The SWE-bench pilot ran ten Verified instances at seed 1. In v1, A and D each resolved 0/10 using 2,124,595 and 1,018,132 tokens respectively. In the repository-summary extension, D used 1,362,598 tokens. Its denials fell from 209 to 32 and resolution stayed at 0/10. The rows, traces and Ada runner fixes are available in [PR #1 at the reviewed revision](https://github.com/Gaurav7888/HarnessSpec/blob/f584be43a85ad577b7439172ef1b51f197da80c1/docs/SWEBENCH.md). [Offline verification and ACM build](docs/PUBLICATION.md)
 
 ## Orchestrator interface
 
@@ -82,7 +80,7 @@ The unit test reads `pilot/results.json` and fails if a fresh pilot run disagree
 | `tests/` | Protocol, repair, and pilot-snapshot tests; one test per validator rule |
 | `fixtures/off_by_one/` | One function whose test fails until `src/app.py` is patched |
 | `pilot/results.json` | Fixture measurements cited by the progress report |
-| `pilot/swebench_instances.json` | Ten SWE-bench Verified instances, with install specs, not yet run |
+| `pilot/swebench_instances.json` | Ten SWE-bench Verified instances, with install specs for the runner on main |
 | `pilot/run_swebench.py` | Unattended SWE-bench runner |
 | `pilot/subagent_fixture_pinned.json` | A and D fixture rows from `pilot/run_subagent.py`, with the pinned model |
 | `pilot/subagent_fixture.json` | Earlier Grok fixture rows, history only (frozen in the SWE-QA manifest) |

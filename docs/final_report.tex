@@ -29,7 +29,10 @@ ten accepted answers contained a verifiable repository citation.
 The corrected experiment completed 120 attempts on the same ten questions.
 D returned an accepted answer without a verified citation in 15 of 30
 attempts, compared with 5 of 30 for B and 0 of 30 for C.
-All 57 accepted answers await independent grading.
+All 57 accepted answers await independent grading. On ten SWE-bench
+instances, neither A nor D resolved an issue. D used fewer tokens than A in
+the registered comparison. Giving D a repository summary reduced tool denials
+from 209 to 32 while resolution stayed at zero. No run reused a specification.
 \end{abstract}
 \maketitle
 
@@ -81,7 +84,7 @@ three seeds per condition. Both SWE-QA treatments use the same ten
 questions at three pinned revisions. V1 paired A and D at seed 1.
 V2 completed 120 attempts at seeds 1, 2 and 3.
 The pinned \artifact{qwen2.5-coder:7b} build runs in Ollama with context
-length 16,384 and temperature 0.2. All conditions receive the same read-only parent card, with execution
+length 16,384 and temperature 0.2. All SWE-QA conditions receive the same read-only parent card, with execution
 ceilings of 12 actions, 8,000 generated tokens and 900 seconds.
 Experimental token totals include all reported design, repair, prompt, and
 generation tokens. The registered
@@ -102,8 +105,13 @@ with the strongest expected effect in the 7--14B tier.
 \end{enumerate}
 
 \section{Benchmark selection}
-SWE-bench Verified measures issue resolution~\cite{swebench}; the staged
-manifest lists ten instances. SWE-QA~\cite{peng} measures repository answer
+SWE-bench Verified measures issue resolution~\cite{swebench}. We used
+ten instances at seed 1 on IIIT Ada. The runner applied each instance's
+test patch during evaluation and scored resolution using only the
+\texttt{FAIL\_TO\_PASS} tests. The subagent could read, list and write files
+under a parent ceiling of 30 actions and 8,000 generated tokens. V1 gave
+the designer the issue and capability card. V2 also supplied a summary
+of tracked repository paths. SWE-QA~\cite{peng} measures repository answer
 quality. Its pilot includes ten released what, why, where and how questions
 from Flask, Requests, and pytest. The selector pins the authors' dataset release
 and repository revisions and verifies evidence paths and line bounds.
@@ -123,21 +131,43 @@ withheld from model prompts, apart from the task and allowed source slice.
 \toprule
 Hypothesis & Observed outcome \\
 \midrule
-H1 & SWE-bench Verified runs pending. \\
+H1 & A and D each resolved 0/10. D used fewer tokens. Meaningful non-inferiority remains unestablished. \\
 H2 & D had more silent handoffs per attempt than B or C. \\
 H3 & Not supported as registered. Fixture, three seeds: first-pass valid
 C 0/3, D 0/3; D 3/3 after repair. Corpus of 15 drafts: 4 valid, 11 after
 compiler repair, 15 with model repair. \artifact{pilot/h3_results_v2.json}. \\
 H4 & D used 9,703 more total tokens than A. Zero cache hits. \\
-Energy & CPU and GPU device readings unavailable on the inference host. \\
+Energy & SWE-QA device readings unavailable. SWE-bench energy unmeasured. \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{H1: Resolution and cost}
-The SWE-bench Verified manifest contains ten issues. Genuine execution
-artifacts from that benchmark are pending. No estimate of the registered
-non-inferiority margin or joint cost outcome is available.
+% Evidence summary for integration. Gaurav owns the final H1 narrative.
+The registered v1 comparison gives a D minus A resolution difference of
+zero percentage points, within the descriptive five-point margin
+(Table~\ref{tab:swebench}). With ten paired failures and one seed, the
+data do not establish meaningful non-inferiority. D consumed fewer tokens
+including design, but tokens per correct result are undefined for both
+arms because neither resolved an instance.
+
+\begin{table}[t]
+\caption{SWE-bench at seed 1. Each row covers the same ten issues.
+V2 adds a repository summary for the designer. A makes no design call.}
+\label{tab:swebench}
+\centering
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrrr}
+\toprule
+Run & Arm & Resolved & Design & Total tokens & Denials \\
+\midrule
+v1 & A & 0/10 & 0 & 2,124,595 & 58 \\
+v1 & D & 0/10 & 21,312 & 1,018,132 & 209 \\
+v2 & A & 0/10 & 0 & 2,124,100 & 58 \\
+v2 & D & 0/10 & 28,652 & 1,362,598 & 32 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{H2: Silent handoffs}
 In v1 the format gate recorded zero silent handoffs for both A and D.
@@ -219,7 +249,9 @@ Across all attempts, source-verified silence was higher for D than B by
 33.3 percentage points (95\% interval 13.3 to 53.3) and higher than C
 by 50.0 points (30.0 to 70.0). Each comparison pairs 30 runs across
 ten task clusters. This goes against the H2 prediction. Conditional on
-acceptance, D exceeded B by 55.3 points and C by 93.8 points.
+acceptance, D exceeded B by 55.3 points (95\% interval 16.7 to 87.5)
+and C by 93.8 points (80.0 to 100.0). These intervals use the 10,000
+and 9,724 bootstrap draws, respectively, with defined denominators.
 The format gate alone flagged two answers across all four conditions.
 Source verification identified 25 silent handoffs.
 The 63 execution failures have finalized result rows. All 57 accepted
@@ -282,7 +314,7 @@ question type, divide the priming cost by held-out per-task savings and
 round up. Nonpositive savings cannot recover a positive priming cost.
 V1 had no successful matched pair.
 Mean A minus D subagent cost was $-2{,}508.1$ tokens per attempt.
-In v2, A minus D averaged 1,284.5 subagent tokens per matched task
+In v2, A minus D averaged 1,284.5 subagent tokens per matched attempt
 (95\% interval $-5{,}205.3$ to $8{,}085.9$). D saved 38,535 execution
 tokens across 30 matched pairs, spent 48,238 on design and used 9,703
 more tokens overall. Differences in acceptance and early stops contribute
@@ -290,15 +322,28 @@ to this comparison. With no graded successful pairs, a quality-adjusted
 break-even is undefined. Every attempt designed afresh, with zero
 specification cache hits.
 
+\section{Discussion}
+With only the task and capability card, the orchestrator can name a path
+that does not exist. In the SWE-bench Requests trace, D selected
+\texttt{requests.py} and omitted directory listing. Its subagent repeated
+the missing-file read until all 30 steps had been refused. The historical
+SWE-QA audit found a related failure. All four executable D designs
+authorized paths absent from their pinned snapshots. In SWE-bench v2,
+supplying a repository summary reduced D's tool denials from 209 to 32
+across the same ten issues. Resolution remained 0/10. Grounding made
+more actions feasible without establishing semantic correctness or
+improving observed resolution. H2 is evaluated by the paired SWE-QA
+handoffs.
+
 \section{Energy efficiency}
 The CPU meter reads RAPL package counters. The NVIDIA meter integrates
 sampled device-wide power. The host denied access to the package counter
 and exposed neither NVIDIA power tooling nor the NVML Python module.
-All 20 v1 and 120 v2 attempts have unavailable device readings. Joules, Wh and success per kWh are unavailable.
+All 20 SWE-QA v1 and 120 v2 attempts lack device readings. SWE-bench energy was unmeasured. Joules, Wh and success per kWh are unavailable.
 
 \section{Threats to validity and limitations}
 The reduced study comprises ten purposively selected questions across
-three repositories. Task-cluster intervals preserve repeated seeds but
+three repositories and ten SWE-bench instances. SWE-QA v2 used three seeds per condition and SWE-bench used one. Task-cluster intervals preserve repeated seeds but
 share repository context and do not establish population-level effects.
 Acceptance differs across conditions, so fewer silent handoffs per
 attempt can arise through rejection. Reference annotations may contain
@@ -307,25 +352,36 @@ published rubric limits comparison with model-judged results.
 Common runtime ceilings allow different combined token expenditure.
 The required named goal command cannot grade semantic QA accuracy.
 V1 used Ollama 0.34.0 with weights registered under 0.40.14.
-V2 used the pinned serving release, Ollama 0.40.14. Fixed run order, server warm-up and a single CPU host limit
-wall-clock comparisons. H3 measures one fixture and one model tier.
+SWE-QA v2 used Ollama 0.40.14 on a single CPU host. Fixed run order
+and server warm-up limit its wall-clock comparisons. SWE-bench used
+Ollama 0.32.15 on an RTX 2080 Ti per instance with the same model
+weights. Omitting \texttt{PASS\_TO\_PASS} tests leaves regression
+preservation unevaluated. H3 measures one fixture and one model tier.
 
 \section{Conclusion}
 HarnessSpec makes delegation policy and its repair costs observable.
-The fixture supports a gain in final validity after repair. SWE-QA
-measures handoff acceptance and source location separately from semantic
-accuracy. Claims about successful reuse require an experiment that
-actually reuses a validated specification.
+On the fixture, repair raised D's final validity after all first drafts
+failed. D produced more source-verified silent handoffs than B or C on
+SWE-QA. Independent grades are needed to assess answer accuracy.
+On SWE-bench, D spent fewer tokens than A while both resolved zero
+issues. On SWE-QA, D saved 38,535 subagent tokens relative to A and
+spent 48,238 designing its specifications. All specifications were
+designed afresh, leaving the return on reuse unmeasured.
 
 \section{Reproducibility and AI-tool disclosure}
-\artifact{docs/SWEQA_V2.md} specifies the corrected protocol and analysis. \artifact{docs/SWEQA.md} specifies dataset, model, commands, evaluation,
-and output provenance. \artifact{docs/SWEQA_AUDIT.md} links the frozen
-checksums, all 48 action classifications and the offline reviewer workflow. \artifact{docs/AI_USE.md} records OpenAI Codex
-implementation and verification, Claude Code for the orchestrator, compiler
-repair and H3 work, and earlier team tool use, with each prompt change made
-after inspecting output. Ollama
-supplies the pinned experimental model. Scripted fixtures, mocked tests,
-and genuine benchmark executions are tracked independently.
+The \href{https://github.com/Gaurav7888/HarnessSpec}{official repository}
+contains the SWE-QA aggregates. The release notes give the offline checks and ACM build command
+(\artifact{docs/PUBLICATION.md}). At commit \texttt{f584be4}, the
+\href{https://github.com/Gaurav7888/HarnessSpec/blob/f584be43a85ad577b7439172ef1b51f197da80c1/docs/SWEBENCH.md}{SWE-bench run record}
+identifies both result files, per-instance traces and Ada job scripts.
+The associated AI log credits Cursor/Grok for Gaurav's runner and Claude
+Code for Affan's runner fixes and Ada runs.
+
+For SWE-QA methods and grading, see \artifact{docs/SWEQA_V2.md} and
+\artifact{docs/SWEQA_AUDIT.md}. The project AI log
+(\artifact{docs/AI_USE.md}) records Codex's contributions to SWE-QA,
+verification and report integration, Claude Code's work on orchestration,
+repair and H3, and changes made after examining model outputs.
 
 \begin{thebibliography}{9}
 \bibitem{aorchestra}
