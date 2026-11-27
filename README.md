@@ -25,7 +25,7 @@ The historical SWE-QA v1 pilot completed 20 real seed-1 attempts. Ten accepted A
 
 ## What is not done
 
-The ten SWE-bench Verified instances are listed in `pilot/swebench_instances.json`. They have not been run. See [SWE-QA pilot and analysis](docs/SWEQA.md) for the pinned question manifest, read-only runner, external grading, shared benchmark records, and energy sidecars. Condition C in `pilot/results.json` is a structural check of a four-field tuple. The model-emitted C is in `pilot/h3_results.json`.
+The ten SWE-bench Verified instances are listed in `pilot/swebench_instances.json`, with the Python version and install commands from SWE-bench v2.1.0. None of them has been installed or run yet. `pilot/run_swebench.py` clones each repo, installs it, and writes resumable rows. See [SWE-QA pilot and analysis](docs/SWEQA.md) for the pinned question manifest, read-only runner, external grading, shared benchmark records, and energy sidecars. Condition C in `pilot/results.json` is a structural check of a four-field tuple. The model-emitted C is in `pilot/h3_results.json`.
 
 ## Orchestrator interface
 
@@ -82,7 +82,8 @@ The unit test reads `pilot/results.json` and fails if a fresh pilot run disagree
 | `tests/` | Protocol, repair, and pilot-snapshot tests; one test per validator rule |
 | `fixtures/off_by_one/` | One function whose test fails until `src/app.py` is patched |
 | `pilot/results.json` | Fixture measurements cited by the progress report |
-| `pilot/swebench_instances.json` | Ten SWE-bench Verified instances, not yet run |
+| `pilot/swebench_instances.json` | Ten SWE-bench Verified instances, with install specs, not yet run |
+| `pilot/run_swebench.py` | Unattended SWE-bench runner |
 | `pilot/subagent_fixture_pinned.json` | A and D fixture rows from `pilot/run_subagent.py`, with the pinned model |
 | `pilot/subagent_fixture.json` | Earlier Grok fixture rows, history only (frozen in the SWE-QA manifest) |
 | `docs/AI_USE.md` | Tool log required by the proposal |

@@ -134,8 +134,10 @@ def run_subagent(
     seed: int,
     client,
     clock: FakeClock | SystemClock | None = None,
+    hook_runner=None,
+    resolved_check=None,
 ) -> dict:
-    session = Session(spec, parent, workspace, clock)
+    session = Session(spec, parent, workspace, clock, hook_runner=hook_runner)
     # SystemClock has already moved during the model call. Adding reply.seconds
     # again would charge that time twice against max_seconds.
     wall_clock = isinstance(session.clock, SystemClock)
@@ -172,7 +174,7 @@ def run_subagent(
         "log": log,
         "subagent_tokens": session.trace.tokens_used,
         "wall_clock_s": round(time.monotonic() - started, 3),
-        "resolved": workspace_passes(workspace),
+        "resolved": (resolved_check or workspace_passes)(workspace),
     }
 
 

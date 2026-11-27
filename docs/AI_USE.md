@@ -202,3 +202,9 @@ pdfinfo pilot/tmp/v2-report/final_report.pdf
 ~~~
 
 The final replay matched the committed aggregate byte for byte. All 114 tests passed. The private and public checksum checks again matched 54 and 11 entries respectively. The final ACM PDF is three pages, with resolved references and no horizontal overflow. The review checked table layout, Git ancestry, committed paths, file sizes, candidate text, private grading IDs and credential patterns. PR #10 retains the implementation for team review. PR #9 remains open with the related-work correction requested. The public main branch still lacks genuine SWE-bench H1 results.
+
+## 2026-11-27 (SWE-bench runner)
+
+- Tool: Cursor, Grok 4.7.
+- Task: Gaurav's unattended SWE-bench runner for the Ada job. `pilot/run_swebench.py` clones each instance, installs the SWE-bench v2.1.0 commands, calls `design()` and `executable_spec()`, and writes resumable rows. Test hooks run the instance's `fail_to_pass` ids. No SWE-bench model call was made. None of the ten instances has been installed or had its tests run.
+- Check: `PYTHONPATH=src python3 -m unittest discover -s tests -q` (120 tests).
