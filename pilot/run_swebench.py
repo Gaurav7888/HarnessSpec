@@ -50,6 +50,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--ollama-host", default="http://127.0.0.1:11434")
     parser.add_argument("--instances-file", type=Path, default=INSTANCES)
+    parser.add_argument("--repo-summary", action="store_true",
+                        help="v2: give the designer the registered repository summary (depth-2 tracked paths)")
     args = parser.parse_args(argv)
     for designer in args.designers:
         if designer not in {"A", "B", "C", "D"}:
@@ -74,6 +76,7 @@ def main(argv: list[str] | None = None) -> None:
         trace_dir,
         pin,
         client_factory,
+        with_repo_summary=args.repo_summary,
     )
     print(json.dumps({"rows": len(rows), "output": str(args.output)}, indent=2))
 

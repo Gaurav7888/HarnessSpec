@@ -273,3 +273,32 @@ class BrokenCheckoutTests(unittest.TestCase):
         (dest / ".git").mkdir(parents=True)          # a clone killed before it finished
         git_clone(instance(root / "origin", commit), dest)
         self.assertEqual(git(dest, "rev-parse", "HEAD"), commit)
+
+
+class RepoSummaryTests(unittest.TestCase):
+    def test_summary_lists_tracked_paths_to_depth_two(self):
+        import tempfile
+        from harnessspec.swebench import repo_summary
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name) / "repo"
+        origin_repo(root)
+        (root / "pkg" / "sub").mkdir(parents=True)
+        (root / "pkg" / "core.py").write_text("x = 1\n", encoding="utf-8")
+        (root / "pkg" / "sub" / "deep.py").write_text("y = 2\n", encoding="utf-8")
+        (root / "untracked.py").write_text("z = 3\n", encoding="utf-8")
+        git(root, "add", "pkg")
+        git(root, "commit", "-m", "pkg")
+        lines = repo_summary(root).splitlines()
+        self.assertEqual(lines, ["README.md", "pkg/core.py", "pkg/sub/"])
+
+    def test_design_prompt_shows_summary_only_when_given(self):
+        from harnessspec.orchestrator import spec_messages, tuple_messages
+        task = {"task_id": "t", "statement": "Fix it."}
+        card = swebench_card()
+        plain = spec_messages(task, card, "m")[-1]["content"]
+        self.assertNotIn("Repository layout", plain)
+        with_summary = dict(task, repo_summary="requests/\nsetup.py")
+        self.assertIn("Repository layout (paths that exist):\nrequests/\nsetup.py",
+                      spec_messages(with_summary, card, "m")[-1]["content"])
+        self.assertIn("requests/", tuple_messages(with_summary, card, "m")[-1]["content"])

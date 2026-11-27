@@ -146,6 +146,24 @@ def prepare_workspace(instance: dict, workdir: Path) -> tuple[Path, str]:
     return checkout, python
 
 
+def repo_summary(workspace: Path, max_lines: int = 120) -> str:
+    """Tracked paths to depth two: top-level files, directories, and their children.
+
+    The registered design input. Built from ``git ls-files`` so it shows only
+    files in the base commit (no venv, no build output), capped at ``max_lines``.
+    """
+    listed = subprocess.run(["git", "ls-files"], cwd=workspace, capture_output=True, text=True, check=False)
+    seen: list[str] = []
+    for path in listed.stdout.splitlines():
+        parts = path.split("/")
+        entry = parts[0] if len(parts) == 1 else "/".join(parts[:2]) + ("/" if len(parts) > 2 else "")
+        if entry not in seen:
+            seen.append(entry)
+    more = len(seen) - max_lines
+    lines = seen[:max_lines] + ([f"... {more} more"] if more > 0 else [])
+    return "\n".join(lines)
+
+
 def _pytest_nodes(python: str, workspace: Path, tests: list[str], timeout: float) -> HookOutcome:
     completed = subprocess.run(
         [python, "-m", "pytest", "-q", "--tb=line", *tests],
@@ -291,7 +309,7 @@ def _blank_row(task_id, designer, seed, pin, design_tokens, rounds, first_pass_v
 
 
 def attempt(instance: dict, designer: str, seed: int, client, pin: dict, workdir: Path,
-            prepare=prepare_workspace) -> tuple[dict | None, dict]:
+            prepare=prepare_workspace, with_repo_summary: bool = False) -> tuple[dict | None, dict]:
     """One designer on one instance. Returns the schema row and the trace record.
 
     The row is None when the checkout or install fails: that is an environment
@@ -310,6 +328,8 @@ def attempt(instance: dict, designer: str, seed: int, client, pin: dict, workdir
                       "setup_error": detail[-2000:], "wall_clock_s": round(time.monotonic() - started, 3)}
 
     task = {"task_id": task_id, "statement": instance["problem_statement"]}
+    if with_repo_summary:
+        task["repo_summary"] = repo_summary(workspace)
     result = design(task, card, designer, seed, client=client)
     try:
         spec = executable_spec(result, task, card)
@@ -364,7 +384,7 @@ def trace_path(trace_dir: Path, row: dict) -> Path:
 
 def run_plan(instances: list[dict], designers: list[str], seeds: list[int], workdir: Path,
              output: Path, trace_dir: Path, pin: dict, client_factory,
-             prepare=prepare_workspace) -> list[dict]:
+             prepare=prepare_workspace, with_repo_summary: bool = False) -> list[dict]:
     """Skip finished rows. Write the array and each trace atomically after every attempt."""
     rows = load_rows(output)
     done = {result_key(row) for row in rows}
@@ -377,7 +397,8 @@ def run_plan(instances: list[dict], designers: list[str], seeds: list[int], work
                     continue
                 if client is None:
                     client = client_factory()
-                row, record = attempt(instance, designer, seed, client, pin, workdir, prepare=prepare)
+                row, record = attempt(instance, designer, seed, client, pin, workdir, prepare=prepare,
+                                      with_repo_summary=with_repo_summary)
                 if row is None:
                     name = f"{instance['instance_id']}__{designer}__seed{seed}__setup_failed.json"
                     write_json(trace_dir / name, record)

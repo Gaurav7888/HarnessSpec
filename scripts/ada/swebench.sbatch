@@ -15,6 +15,7 @@
 # each, at most 4 at once (the QoS GPU limit).
 #   sbatch scripts/ada/swebench.sbatch                       # all ten, A and D, seed 1
 #   DESIGNERS="B C" SEEDS="1 2 3" sbatch --array=0,4 scripts/ada/swebench.sbatch
+#   VARIANT=v2 sbatch --export=ALL scripts/ada/swebench.sbatch   # with the repository summary
 # Each instance writes pilot/swebench/<instance>.json (and _traces/), so tasks never
 # share a file; scripts/ada/merge_swebench.py builds pilot/swebench_results.json.
 # Rows are resumable: a resubmitted task skips finished ones. A setup failure
@@ -46,7 +47,10 @@ source scripts/ada/ollama_job.sh
 start_ollama "$RUN/ollama.log"
 ensure_model qwen2.5-coder:7b
 
-mkdir -p pilot/swebench
+# VARIANT=v2 gives the designer the registered repository summary and writes to pilot/swebench_v2/.
+OUT=pilot/swebench; EXTRA=()
+if [ "${VARIANT:-v1}" = "v2" ]; then OUT=pilot/swebench_v2; EXTRA=(--repo-summary); fi
+mkdir -p "$OUT"
 $PY pilot/run_swebench.py --designers ${DESIGNERS:-A D} --seeds ${SEEDS:-1} --instances "$ID" \
-    --workdir "$WORK" --output "pilot/swebench/$ID.json" --ollama-host "$OLLAMA_HOST_URL"
+    --workdir "$WORK" --output "$OUT/$ID.json" --ollama-host "$OLLAMA_HOST_URL" "${EXTRA[@]}"
 echo "end=$(date -Is)"
