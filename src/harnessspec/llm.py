@@ -17,6 +17,16 @@ ROOT = Path(__file__).resolve().parents[2]
 MODEL_PIN = ROOT / "pilot" / "model.json"
 DEFAULT_HOST = "http://localhost:11434"
 
+# Ollama 0.40 reports a model's digest as its manifest's config-layer digest;
+# Ollama 0.32 (the conda-forge CUDA build used on Ada) reports the SHA-256 of
+# the manifest file itself. For the pinned qwen2.5-coder:7b both name one
+# manifest: sha256 4aaba1ee... of the manifest whose config layer is dae161e2...
+# (checked byte for byte on the pinning Mac and on Ada, 2026-11-27).
+EQUIVALENT_DIGESTS = {
+    "sha256:4aaba1ee422af93aad53ecbdfc8a159770cf254a9950b7a4304cf9ee3555ef31":
+        "sha256:dae161e27b0e90dd1856c8bb3209201fd6736d8eb66298e75ed87571486f4364",
+}
+
 
 @dataclass(frozen=True)
 class Reply:
@@ -68,7 +78,7 @@ class OllamaClient:
         if local is None:
             raise RuntimeError(f"{self.name} is not pulled; run: ollama pull {self.name}")
         digest = local["digest"] if local["digest"].startswith("sha256:") else "sha256:" + local["digest"]
-        if digest != self.digest:
+        if digest != self.digest and EQUIVALENT_DIGESTS.get(digest) != self.digest:
             raise RuntimeError(f"{self.name} digest {digest} does not match pin {self.digest}")
 
     def chat(self, messages: list[dict], seed: int, json_mode: bool = False) -> Reply:

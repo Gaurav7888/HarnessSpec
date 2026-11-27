@@ -90,6 +90,21 @@ class SwebenchRunnerTests(unittest.TestCase):
         self.assertEqual((checkout / "ready").read_text(encoding="utf-8"), "yes")
         self.assertTrue(python.endswith("/bin/python"))
 
+    def test_reused_checkout_drops_files_the_previous_designer_left(self):
+        import tempfile
+        held = tempfile.TemporaryDirectory()
+        self.addCleanup(held.cleanup)
+        root = Path(held.name)
+        commit = origin_repo(root / "origin")
+        inst = instance(root / "origin", commit)
+        dest = root / "work" / "checkout"
+        git_clone(inst, dest)
+        (dest / "README.md").write_text("edited by A\n", encoding="utf-8")
+        (dest / "new_by_a.py").write_text("x = 1\n", encoding="utf-8")
+        git_clone(inst, dest)
+        self.assertEqual((dest / "README.md").read_text(encoding="utf-8"), "bug\n")
+        self.assertFalse((dest / "new_by_a.py").exists())
+
     def test_install_records_a_failing_command(self):
         import tempfile
         from harnessspec.swebench import SetupError

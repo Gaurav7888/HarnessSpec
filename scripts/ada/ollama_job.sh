@@ -1,7 +1,14 @@
 #!/bin/bash
-# Start the pinned Ollama server inside a SLURM job, then run a command against it.
+# Start Ollama inside a SLURM job, then run a command against it.
 #
-#   sbatch scripts/ada/smoke.sbatch            # uses this file
+#   source scripts/ada/ollama_job.sh
+#   start_ollama "$RUN/ollama.log"     # refuses to continue on CPU
+#   ensure_model qwen2.5-coder:7b
+#
+# Ollama on Ada is the conda-forge CUDA 12.9 build (0.32.15) in ~/.conda/envs/ollama.
+# The official 0.40.14 release's cuda_v13 needs a newer driver than Ada's (580), and
+# GitHub release downloads do not reach Ada. The model, its digest, and the request
+# options are the pinned ones (pilot/model.json).
 #
 # The server listens on 127.0.0.1 only, on a port derived from the job ID so two
 # jobs on one node do not collide. It is killed when the job script exits.
@@ -9,7 +16,9 @@
 
 set -euo pipefail
 
-OLLAMA_BIN=${OLLAMA_BIN:-$HOME/opt/ollama-0.40.14/bin/ollama}
+OLLAMA_ENV=${OLLAMA_ENV:-$HOME/.conda/envs/ollama}
+OLLAMA_BIN=${OLLAMA_BIN:-$OLLAMA_ENV/bin/ollama}
+export LD_LIBRARY_PATH=$OLLAMA_ENV/lib:${LD_LIBRARY_PATH:-}
 export OLLAMA_MODELS=${OLLAMA_MODELS:-$HOME/ollama-models}
 PORT=$((20000 + ${SLURM_JOB_ID:-0} % 20000))
 export OLLAMA_HOST=127.0.0.1:$PORT
@@ -25,6 +34,14 @@ start_ollama() {
   for _ in $(seq 90); do
     if curl -sf "$OLLAMA_HOST_URL/api/version" > /dev/null; then
       echo "ollama $(curl -s "$OLLAMA_HOST_URL/api/version") on $OLLAMA_HOST_URL"
+      local compute
+      compute=$(grep -m1 "inference compute" "$log" || true)
+      echo "$compute"
+      # A CPU fallback runs a 7B call in minutes, not seconds; stop rather than waste the job.
+      if ! grep -q "library=CUDA" <<< "$compute"; then
+        echo "ollama did not find a CUDA GPU; refusing to run on CPU (see $log)" >&2
+        return 1
+      fi
       return 0
     fi
     sleep 2

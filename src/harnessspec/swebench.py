@@ -95,6 +95,10 @@ def git_clone(instance: dict, dest: Path) -> None:
         ["git", "checkout", "--force", instance["base_commit"]],
         cwd=dest, check=True, env=env,
     )
+    # A reused checkout keeps files the previous designer created; checkout
+    # --force restores tracked files only. Build artifacts are ignored files
+    # and stay (no -x), so the editable install keeps working.
+    subprocess.run(["git", "clean", "-fd"], cwd=dest, check=True, env=env)
 
 
 def run_install(python: str, commands: list[str], workspace: Path) -> None:

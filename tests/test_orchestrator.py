@@ -264,3 +264,26 @@ class QaPromptTests(unittest.TestCase):
         result = design(task, self.card, "C", seed=1, client=model)
         self.assertNotIn("HarnessSpec for read-only", model.calls[0]["messages"][0]["content"])
         self.assertEqual(result["rounds"], 0)
+
+
+class DigestEquivalenceTests(unittest.TestCase):
+    """Ollama 0.32 reports the manifest hash; 0.40 reports the config digest."""
+
+    def _client(self, reported):
+        from unittest import mock
+
+        from harnessspec.llm import OllamaClient
+
+        with mock.patch.object(OllamaClient, "_post",
+                               return_value={"models": [{"name": load_pin()["name"], "digest": reported}]}):
+            return OllamaClient(load_pin())
+
+    def test_pinned_config_digest_passes(self):
+        self._client(load_pin()["digest"])
+
+    def test_equivalent_manifest_hash_passes(self):
+        self._client("4aaba1ee422af93aad53ecbdfc8a159770cf254a9950b7a4304cf9ee3555ef31")
+
+    def test_other_digest_is_refused(self):
+        with self.assertRaises(RuntimeError):
+            self._client("sha256:" + "0" * 64)
