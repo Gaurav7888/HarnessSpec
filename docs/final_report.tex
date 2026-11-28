@@ -133,9 +133,8 @@ Hypothesis & Observed outcome \\
 \midrule
 H1 & A and D each resolved 0/10. D used fewer tokens. Meaningful non-inferiority remains unestablished. \\
 H2 & D had more silent handoffs per attempt than B or C. \\
-H3 & Not supported as registered. Fixture, three seeds: first-pass valid
-C 0/3, D 0/3; D 3/3 after repair. Corpus of 15 drafts: 4 valid, 11 after
-compiler repair, 15 with model repair. \artifact{pilot/h3_results_v2.json}. \\
+H3 & Mixed. First-pass valid, C vs D: fixture 0/3 vs 0/3; SWE-QA v2
+0/30 vs 9/30. SWE-bench D 0/10 first pass, 10/10 after repair. \\
 H4 & D used 9,703 more total tokens than A. Zero cache hits. \\
 Energy & SWE-QA device readings unavailable. SWE-bench energy unmeasured. \\
 \bottomrule
@@ -280,8 +279,8 @@ D & 0/3 & 3/3 & 1 & 1,602 \\
 \end{tabular}
 \end{table}
 
-H3 as registered is not supported: first-pass validity does not rise from C
-to D (Table~\ref{tab:h3}). Every first D reply wrote its acceptance test and
+On the fixture, first-pass validity does not rise from C to D
+(Table~\ref{tab:h3}). Every first D reply wrote its acceptance test and
 hook as \texttt{pytest tests/test\_app.py::\ldots}, and two of three filled
 the model digest with a placeholder. The compiler cleared both in one round
 without a second model call. Each C reply lacked the fields the tuple does not
@@ -295,13 +294,21 @@ compiler may not fix: a missing acceptance test, a context path that left the
 workspace, an empty goal, and the four-field tuple. No D design ended with a
 missing acceptance test.
 
+The benchmark designs add real tasks. On SWE-QA v2, first-pass validity
+rose from C's 0/30 to D's 9/30 over three seeds, with 21 repair rounds in
+total. On SWE-bench, every first D reply in v1 and v2 named \texttt{pytest}
+with a test selector (\texttt{command.unknown}); the compiler reduced it, and
+all ten designs ran after one round (one v2 design took two). H3 is therefore
+mixed: the C-to-D rise appears on SWE-QA but not on the fixture, and D's own
+first-pass rate ranged from 0 to 30\%. Because C cannot be valid under this
+validator, that rise partly restates the protocol.
+
 The supported claim is therefore narrower. Typed validation with bounded
 repair turns D's invalid first replies into valid specs, at about four times
-C's design cost, but it does not make the orchestrator's first reply valid. On
+C's design cost, but it does not reliably make the orchestrator's first reply valid. On
 the fixture end to end (\artifact{pilot/subagent_fixture_pinned.json}), A and
 D both resolved; D spent 1,603 design and 1,770 subagent tokens against A's
-1,239 subagent tokens. Three seeds on one task are a pilot. C cannot be
-valid under this validator by construction. Two prompt and compiler changes
+1,239 subagent tokens. Three seeds on one task are a pilot. Two prompt and compiler changes
 followed inspection of earlier output and preceded this run: error hints with
 an unchanged-reply stop, and command reduction, which followed the same
 selector failure in v1 (\artifact{pilot/h3_results.json}, before
@@ -356,7 +363,7 @@ SWE-QA v2 used Ollama 0.40.14 on a single CPU host. Fixed run order
 and server warm-up limit its wall-clock comparisons. SWE-bench used
 Ollama 0.32.15 on an RTX 2080 Ti per instance with the same model
 weights. Omitting \texttt{PASS\_TO\_PASS} tests leaves regression
-preservation unevaluated. H3 measures one fixture and one model tier.
+preservation unevaluated. H3 uses one fixture, two benchmarks and one model tier.
 
 \section{Conclusion}
 HarnessSpec makes delegation policy and its repair costs observable.
